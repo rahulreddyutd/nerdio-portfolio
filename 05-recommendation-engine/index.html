@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI Recommendation Engine | PM Portfolio</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;gap:12px;padding:0 20px;height:52px}
+.tb-title{font-size:15px;font-weight:600}
+.pill{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;background:#dcfce7;color:#166534}
+.tab-bar{background:#fff;border-bottom:1px solid #e5e5e5;display:flex;padding:0 20px}
+.tab{padding:12px 18px;font-size:13px;cursor:pointer;color:#666;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab:hover{color:#1a1a1a}
+.tab.active{color:#2563eb;font-weight:600;border-bottom-color:#2563eb}
+.panel{display:none;padding:20px}
+.panel.active{display:block}
+.st{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.ctx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.ctx-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px}
+.ctx-label{font-size:11px;color:#888;margin-bottom:6px;font-weight:600}
+select{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;background:#fff;color:#1a1a1a;outline:none;cursor:pointer;font-family:inherit}
+select:focus{border-color:#2563eb}
+.rec-card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:18px;margin-bottom:14px}
+.rec-hdr{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+.rec-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.rec-title{font-size:14px;font-weight:700;margin-bottom:3px}
+.rec-sub{font-size:12px;color:#888}
+.rec-conf{margin-left:auto;text-align:right;flex-shrink:0}
+.conf-val{font-size:20px;font-weight:700}
+.conf-lbl{font-size:10px;color:#888}
+.conf-bar-bg{width:80px;height:6px;background:#f3f4f6;border-radius:3px;margin-top:5px}
+.conf-bar-fill{height:100%;border-radius:3px}
+.rec-why{font-size:13px;color:#555;margin-bottom:10px;line-height:1.5;padding:11px 13px;background:#f9fafb;border-radius:8px;border-left:3px solid #bfdbfe}
+.alts-label{font-size:11px;color:#bbb;margin-bottom:6px}
+.alt-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.alt-btn{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid #e5e5e5;background:#fff;color:#666;cursor:pointer}
+.alt-btn:hover{background:#f9fafb}
+.action-row{display:flex;gap:8px}
+.apply-btn{font-size:12px;padding:7px 18px;border-radius:20px;border:1px solid #86efac;background:#fff;color:#166534;cursor:pointer;font-weight:600}
+.apply-btn:hover{background:#dcfce7}
+.dismiss-btn{font-size:12px;padding:7px 13px;border-radius:20px;border:1px solid #e5e5e5;background:#fff;color:#888;cursor:pointer}
+.explain-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.explain-card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:16px}
+.explain-title{font-size:13px;font-weight:700;margin-bottom:10px}
+.sig-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#555;margin-bottom:4px}
+.sig-bar{height:5px;background:#f3f4f6;border-radius:3px;margin-bottom:10px}
+.sig-fill{height:100%;border-radius:3px;background:#2563eb}
+.explain-body{font-size:12px;color:#555;line-height:1.7}
+.ctx-label-inline{font-weight:700;color:#1a1a1a}
+.acc-bar-wrap{display:flex;gap:4px;align-items:flex-end;height:60px;margin:10px 0 6px}
+.acc-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.acc-bar{width:100%;border-radius:2px 2px 0 0;background:#2563eb}
+.acc-lbl{font-size:9px;color:#bbb}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="width:28px;height:28px;background:#dbeafe;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px">&#129504;</div>
+  <div class="tb-title">AI Recommendation Engine</div>
+  <div class="pill">Model v2.1 &middot; 94% accuracy</div>
+  <div style="margin-left:auto;font-size:12px;color:#666">Context signals: 12 active &middot; 847 decisions trained</div>
+</div>
+<div class="tab-bar">
+  <div class="tab active" onclick="sw('recs',this)">Recommendations</div>
+  <div class="tab" onclick="sw('explain',this)">Explainability</div>
+</div>
+
+<div class="panel active" id="tab-recs">
+  <div class="st">Configure context &mdash; recommendations adapt to your environment</div>
+  <div class="ctx-grid">
+    <div class="ctx-card"><div class="ctx-label">Environment type</div><select id="ctx-env" onchange="genRecs()"><option>Production</option><option>Development</option><option>Staging</option></select></div>
+    <div class="ctx-card"><div class="ctx-label">Optimization goal</div><select id="ctx-goal" onchange="genRecs()"><option>Cost reduction</option><option>Performance first</option><option>Balanced</option></select></div>
+    <div class="ctx-card"><div class="ctx-label">Risk tolerance</div><select id="ctx-risk" onchange="genRecs()"><option>Conservative</option><option>Moderate</option><option>Aggressive</option></select></div>
+  </div>
+  <div id="rec-list"></div>
+</div>
+
+<div class="panel" id="tab-explain">
+  <div class="st">How the recommendation model works</div>
+  <div class="explain-grid">
+    <div class="explain-card">
+      <div class="explain-title">Signal weights &mdash; VM sizing decisions</div>
+      <div class="sig-row"><span>CPU utilization (30d avg)</span><span style="font-weight:700">38%</span></div><div class="sig-bar"><div class="sig-fill" style="width:38%"></div></div>
+      <div class="sig-row"><span>Memory utilization</span><span style="font-weight:700">22%</span></div><div class="sig-bar"><div class="sig-fill" style="width:22%"></div></div>
+      <div class="sig-row"><span>Environment tag (prod/dev)</span><span style="font-weight:700">18%</span></div><div class="sig-bar"><div class="sig-fill" style="width:18%;background:#d97706"></div></div>
+      <div class="sig-row"><span>Historical pattern similarity</span><span style="font-weight:700">14%</span></div><div class="sig-bar"><div class="sig-fill" style="width:14%;background:#16a34a"></div></div>
+      <div class="sig-row"><span>User approval history</span><span style="font-weight:700">8%</span></div><div class="sig-bar"><div class="sig-fill" style="width:8%;background:#888"></div></div>
+    </div>
+    <div class="explain-card">
+      <div class="explain-title">Confidence calibration</div>
+      <div class="explain-body">
+        <b>High (85%+):</b> 15+ similar decisions in training set, consistent outcome.<br><br>
+        <b>Medium (60-84%):</b> Fewer analogues or mixed outcomes &mdash; review carefully.<br><br>
+        <b>Low (&lt;60%):</b> Novel pattern &mdash; model is extrapolating. Human review required.<br><br>
+        The model penalizes confidence for production environments and raises it for well-tagged development resources.
+      </div>
+    </div>
+    <div class="explain-card">
+      <div class="explain-title">Context signals injected per recommendation</div>
+      <div class="explain-body">
+        &bull; <b>Environment tag</b> &mdash; prod VMs get conservative sizing; dev gets aggressive<br><br>
+        &bull; <b>Business hours pattern</b> &mdash; working hours only resources qualify for auto-shutdown<br><br>
+        &bull; <b>Org approval chain</b> &mdash; actions above $500/mo trigger manager approval<br><br>
+        &bull; <b>Blast radius score</b> &mdash; multi-dependent resources get lower confidence + forced review
+      </div>
+    </div>
+    <div class="explain-card">
+      <div class="explain-title">Acceptance rate over time</div>
+      <div style="font-size:12px;color:#888;margin-bottom:6px">As model learns your environment (last 6 months)</div>
+      <div class="acc-bar-wrap" id="acc-chart"></div>
+      <div style="font-size:11px;color:#16a34a;font-weight:600">28% &#8594; 58% (+107%) as model learns your org</div>
+    </div>
+  </div>
+</div>
+
+<script>
+var recData={
+  Production:{
+    "Cost reduction":{
+      Conservative:[
+        {icon:"&#128161;",bg:"#fef9c3",title:"Purchase Reserved Instances for vm-prod-cluster (3x)",sub:"Commitment: 1-year &middot; Savings: $1,480/mo",conf:91,confColor:"#16a34a",why:"This cluster has run at over 90% uptime for 8 consecutive months. A 1-year RI carries <b>zero operational risk</b> &mdash; it is a billing change only. Similar decisions approved in 14 of 14 comparable prod clusters in training data.",alts:["3-year RI (higher savings, less flexible)","Savings plans instead of RI","Maintain pay-as-you-go"]},
+        {icon:"&#8595;&#65039;",bg:"#dbeafe",title:"Enable auto-shutdown for sql-analytics (off-hours)",sub:"Weekdays 8pm-7am &middot; Weekends full &middot; Saves $860/mo",conf:84,confColor:"#2563eb",why:"Query logs show <b>zero activity between 8pm-7am on weekdays</b> and zero weekend usage across last 30 days. Conservative, reversible action with no SLA impact.",alts:["Serverless tier (more savings, cold start risk)","Reduce SKU instead of shutdown"]}
+      ]
+    },
+    "Performance first":{
+      Conservative:[
+        {icon:"&#8679;",bg:"#fef2f2",title:"Upscale vm-prod-api-02 to D8s v3 (from D4s)",sub:"Peak CPU at 92% &middot; Risk of throttling &middot; Cost +$380/mo",conf:87,confColor:"#16a34a",why:"vm-prod-api-02 hit <b>CPU throttling 14 times last week</b>, correlating with 3 P2 customer-reported latency incidents. Upscaling prevents SLA breach.",alts:["Add another D4s to cluster instead","Enable CPU bursting (B-series)"]}
+      ]
+    }
+  },
+  Development:{
+    "Cost reduction":{
+      Conservative:[
+        {icon:"&#128683;",bg:"#fef9c3",title:"Schedule weekend shutdown for all dev VMs",sub:"Sat 8pm &ndash; Mon 7am &middot; Saves $820/mo",conf:96,confColor:"#16a34a",why:"<b>Zero weekend usage detected</b> across all 8 dev VMs for the past 12 weeks. Weekend shutdown is the lowest-risk cost action available &mdash; saves $820/mo with no developer impact.",alts:["Business hours only (more savings)","Notify team + opt-out option"]}
+      ],
+      Aggressive:[
+        {icon:"&#128683;",bg:"#fef2f2",title:"Stop all dev VMs outside business hours",sub:"Mon-Fri 7pm-8am + weekends &middot; Saves $2,840/mo",conf:95,confColor:"#16a34a",why:"<b>Zero production dependencies</b> detected on any of 8 dev VMs. Historical data: dev VMs are idle 67% of the time they are running.",alts:["Schedule shutdown only on weekends","Notify users before shutdown"]},
+        {icon:"&#8595;&#65039;",bg:"#dbeafe",title:"Downsize 5 dev VMs from D4s to B2s",sub:"Dev workloads rarely need over 2 CPU &middot; Saves $1,240/mo",conf:89,confColor:"#16a34a",why:"B2s (burstable) VMs are <b>designed for dev/test</b>: low baseline CPU with burst capability covers 98% of dev use cases.",alts:["Downsize to B4ms for more burst","Keep 2 D4s for build machines"]}
+      ]
+    }
+  }
+};
+
+function getFallback(){return recData.Production["Cost reduction"].Conservative;}
+
+function genRecs(){
+  var env=document.getElementById("ctx-env").value;
+  var goal=document.getElementById("ctx-goal").value;
+  var risk=document.getElementById("ctx-risk").value;
+  var recs;
+  try{recs=recData[env][goal][risk];}catch(e){recs=null;}
+  if(!recs||recs.length===0){
+    try{recs=recData[env]["Cost reduction"].Conservative;}catch(e){recs=getFallback();}
+  }
+  var el=document.getElementById("rec-list");
+  el.innerHTML='<div style="font-size:12px;color:#888;margin-bottom:14px">Showing <b>'+recs.length+' recommendations</b> for <b>'+env+'</b> &middot; Goal: <b>'+goal+'</b> &middot; Risk: <b>'+risk+'</b></div>'
+    +recs.map(function(r,i){
+      return '<div class="rec-card" id="rc-'+i+'">'
+        +'<div class="rec-hdr">'
+        +'<div class="rec-icon" style="background:'+r.bg+'">'+r.icon+'</div>'
+        +'<div style="flex:1"><div class="rec-title">'+r.title+'</div><div class="rec-sub">'+r.sub+'</div></div>'
+        +'<div class="rec-conf"><div class="conf-val" style="color:'+r.confColor+'">'+r.conf+'%</div><div class="conf-lbl">confidence</div>'
+        +'<div class="conf-bar-bg"><div class="conf-bar-fill" style="width:'+r.conf+'%;background:'+r.confColor+'"></div></div></div></div>'
+        +'<div class="rec-why">Why this recommendation? '+r.why+'</div>'
+        +'<div class="alts-label">Alternatives considered:</div>'
+        +'<div class="alt-row">'+r.alts.map(function(a){return '<button class="alt-btn">'+a+'</button>';}).join("")+'</div>'
+        +'<div class="action-row">'
+        +'<button class="apply-btn" onclick="this.textContent=\'&#10003; Applied\';this.disabled=true;this.style.background=\'#dcfce7\'">Approve &amp; apply</button>'
+        +'<button class="dismiss-btn" onclick="document.getElementById(\'rc-'+i+'\').style.display=\'none\'">Dismiss</button>'
+        +'</div></div>';
+    }).join("");
+}
+
+function buildAccChart(){
+  var vals=[28,34,41,48,52,58];
+  var max=60;
+  var el=document.getElementById("acc-chart");
+  var months=["Oct","Nov","Dec","Jan","Feb","Mar"];
+  el.innerHTML=vals.map(function(v,i){
+    var h=Math.round(v/max*54);
+    var op=(0.4+i*0.12).toFixed(2);
+    return '<div class="acc-col"><div class="acc-bar" style="height:'+h+'px;opacity:'+op+'"></div><div class="acc-lbl">'+months[i]+'</div></div>';
+  }).join("");
+}
+
+function sw(n,el){
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active")});
+  if(el)el.classList.add("active");
+  document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("active")});
+  document.getElementById("tab-"+n).classList.add("active");
+}
+
+genRecs();
+buildAccChart();
+</script>
+</body>
+</html>

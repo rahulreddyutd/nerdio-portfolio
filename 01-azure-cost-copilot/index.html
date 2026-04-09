@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Cost Copilot | PM Portfolio</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #1a1a1a; min-height: 100vh; }
+
+  /* ── Layout ── */
+  .shell { display: grid; grid-template-rows: 52px 48px 1fr; height: 100vh; }
+  .topbar { background: #fff; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; gap: 12px; padding: 0 20px; }
+  .topbar-logo { width: 28px; height: 28px; background: #dbeafe; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .topbar-title { font-size: 15px; font-weight: 600; }
+  .topbar-pill { font-size: 11px; padding: 3px 9px; border-radius: 20px; background: #dcfce7; color: #166534; font-weight: 600; }
+  .topbar-stats { margin-left: auto; display: flex; gap: 20px; font-size: 12px; color: #666; }
+  .topbar-stats b { color: #1a1a1a; }
+
+  .body-grid { display: grid; grid-template-columns: 220px 1fr; height: calc(100vh - 52px - 48px); }
+
+  /* ── Tabs ── */
+  .tab-row { background: #fff; border-bottom: 1px solid #e5e5e5; display: flex; padding: 0 20px; grid-column: 1/-1; }
+  .tab { padding: 12px 18px; font-size: 13px; cursor: pointer; color: #666; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s; white-space: nowrap; }
+  .tab:hover { color: #1a1a1a; }
+  .tab.active { color: #2563eb; font-weight: 600; border-bottom-color: #2563eb; }
+
+  /* ── Sidebar ── */
+  .sidebar { background: #fafafa; border-right: 1px solid #e5e5e5; overflow-y: auto; }
+  .sidebar-section { padding: 12px 16px 4px; font-size: 10px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: .08em; }
+  .sidebar-item { display: flex; align-items: center; gap: 9px; padding: 9px 16px; font-size: 13px; color: #555; cursor: pointer; transition: background .12s; }
+  .sidebar-item:hover { background: #f0f0f0; color: #1a1a1a; }
+  .sidebar-item.active { background: #fff; color: #2563eb; font-weight: 600; border-left: 2px solid #2563eb; }
+  .sdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .sc { margin-left: auto; font-size: 11px; font-weight: 600; color: #1a1a1a; }
+
+  /* ── Main panels ── */
+  .main { overflow-y: auto; }
+  .panel { display: none; padding: 24px; }
+  .panel.active { display: block; }
+
+  /* ── KPI cards ── */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .kpi { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 16px; }
+  .kpi-label { font-size: 11px; color: #888; margin-bottom: 6px; font-weight: 500; }
+  .kpi-value { font-size: 24px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; margin-top: 5px; }
+  .red { color: #dc2626; }
+  .green { color: #16a34a; }
+  .blue { color: #2563eb; }
+
+  /* ── Anomaly banner ── */
+  .anomaly { display: flex; align-items: flex-start; gap: 12px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
+  .anomaly-text { flex: 1; font-size: 13px; line-height: 1.5; }
+  .anomaly-text b { display: block; color: #dc2626; margin-bottom: 2px; font-size: 13px; }
+  .anomaly-btn { background: #fff; border: 1px solid #fca5a5; color: #dc2626; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .anomaly-btn:hover { background: #fef2f2; }
+
+  /* ── Section title ── */
+  .section-title { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+
+  /* ── Bar chart ── */
+  .bar-chart { display: flex; gap: 4px; align-items: flex-end; height: 80px; margin-bottom: 24px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 4px; }
+  .bar-val { font-size: 9px; color: #999; font-weight: 500; }
+  .bar-lbl { font-size: 9px; color: #bbb; }
+
+  /* ── Table ── */
+  .rtable { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #e5e5e5; }
+  .rtable th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; color: #888; background: #fafafa; border-bottom: 1px solid #e5e5e5; text-transform: uppercase; letter-spacing: .04em; }
+  .rtable td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; }
+  .rtable tr:last-child td { border-bottom: none; }
+  .rtable tr:hover td { background: #f9fafb; }
+  .sbadge { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 600; }
+  .b-idle { background: #fef2f2; color: #dc2626; }
+  .b-active { background: #dcfce7; color: #166534; }
+  .b-scaled { background: #fef9c3; color: #854d0e; }
+  .b-saved { background: #dbeafe; color: #1e40af; }
+  .abtn { font-size: 11px; padding: 4px 12px; border-radius: 20px; border: 1px solid #d1d5db; background: #fff; color: #374151; cursor: pointer; font-weight: 500; }
+  .abtn:hover { background: #f3f4f6; }
+  .abtn.exec { border-color: #86efac; color: #166534; }
+  .abtn.exec:hover { background: #dcfce7; }
+
+  /* ── Rec cards ── */
+  .rec-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+  .rec-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+  .rec-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+  .rec-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .rec-sub { font-size: 12px; color: #888; }
+  .rec-savings { margin-left: auto; text-align: right; flex-shrink: 0; }
+  .rec-amount { font-size: 17px; font-weight: 700; color: #16a34a; }
+  .rec-lbl { font-size: 10px; color: #999; }
+  .rec-body { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 12px; }
+  .rec-footer { display: flex; align-items: center; gap: 8px; }
+  .conf-badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; background: #f3f4f6; color: #555; font-weight: 500; }
+  .conf-high { background: #dcfce7; color: #166534; }
+  .approve-btn { margin-left: auto; font-size: 12px; padding: 7px 18px; border-radius: 20px; border: 1px solid #86efac; background: #fff; color: #166534; cursor: pointer; font-weight: 600; }
+  .approve-btn:hover { background: #dcfce7; }
+  .dismiss-btn { font-size: 12px; padding: 7px 13px; border-radius: 20px; border: 1px solid #e5e5e5; background: #fff; color: #888; cursor: pointer; }
+
+  /* ── Chat ── */
+  .chat-wrap { display: flex; flex-direction: column; height: calc(100vh - 52px - 48px - 48px); }
+  .chat-msgs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-bottom: 12px; }
+  .msg { display: flex; gap: 10px; }
+  .msg.user { flex-direction: row-reverse; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .av-ai { background: #dbeafe; color: #1e40af; }
+  .av-user { background: #f3f4f6; color: #555; }
+  .bubble-wrap { max-width: 82%; }
+  .bubble-name { font-size: 11px; color: #bbb; margin-bottom: 4px; }
+  .msg.user .bubble-name { text-align: right; }
+  .bubble { font-size: 13px; line-height: 1.6; background: #f3f4f6; border-radius: 12px; padding: 11px 15px; color: #1a1a1a; }
+  .msg.user .bubble { background: #dbeafe; color: #1e3a8a; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 9px; }
+  .chip { font-size: 12px; padding: 6px 13px; border-radius: 20px; border: 1px solid #d1d5db; background: #fff; color: #555; cursor: pointer; transition: all .15s; }
+  .chip:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+  .chat-input-row { display: flex; gap: 8px; padding-top: 14px; border-top: 1px solid #e5e5e5; flex-shrink: 0; margin-top: auto; }
+  .chat-input { flex: 1; padding: 10px 15px; border: 1px solid #d1d5db; border-radius: 22px; font-size: 13px; background: #fff; color: #1a1a1a; outline: none; font-family: inherit; }
+  .chat-input:focus { border-color: #2563eb; }
+  .send-btn { padding: 10px 20px; border-radius: 22px; border: none; background: #2563eb; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .send-btn:hover { background: #1d4ed8; }
+
+  /* ── Actions ── */
+  .action-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; }
+  .action-info { flex: 1; }
+  .action-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .action-detail { font-size: 12px; color: #888; }
+
+  /* ── Typing ── */
+  @keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #999; display: inline-block; animation: blink 1.3s ease-in-out infinite; margin: 0 2px; }
+  .dot:nth-child(2){animation-delay:.2s} .dot:nth-child(3){animation-delay:.4s}
+</style>
+</head>
+<body>
+<div class="shell">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-logo">☁️</div>
+    <div class="topbar-title">Azure Cost Copilot</div>
+    <div class="topbar-pill">● Live</div>
+    <div class="topbar-stats">
+      <span>Subscription <b>MSDN-Enterprise</b></span>
+      <span>Region <b>East US 2</b></span>
+      <span>MTD Spend <b>$18,420</b></span>
+    </div>
+  </div>
+
+  <!-- Tab row -->
+  <div class="tab-row">
+    <div class="tab active" onclick="switchTab('overview',this)">Overview</div>
+    <div class="tab" onclick="switchTab('recs',this)">Recommendations (5)</div>
+    <div class="tab" onclick="switchTab('chat',this)">Copilot Chat</div>
+    <div class="tab" onclick="switchTab('actions',this)">Auto-Actions</div>
+  </div>
+
+  <!-- Body -->
+  <div class="body-grid">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">Services</div>
+      <div class="sidebar-item active"><div class="sdot" style="background:#2563eb"></div>All Resources<span class="sc">$18,420</span></div>
+      <div class="sidebar-item"><div class="sdot" style="background:#dc2626"></div>Virtual Machines<span class="sc">$9,240</span></div>
+      <div class="sidebar-item"><div class="sdot" style="background:#d97706"></div>Storage<span class="sc">$3,810</span></div>
+      <div class="sidebar-item"><div class="sdot" style="background:#16a34a"></div>Azure SQL<span class="sc">$2,970</span></div>
+      <div class="sidebar-item"><div class="sdot" style="background:#2563eb"></div>Networking<span class="sc">$1,640</span></div>
+      <div class="sidebar-item"><div class="sdot" style="background:#d97706"></div>AVD Hosts<span class="sc">$760</span></div>
+      <div class="sidebar-section" style="margin-top:12px">Alerts</div>
+      <div class="sidebar-item" style="font-size:12px"><div class="sdot" style="background:#dc2626"></div>Anomaly: Storage spike</div>
+      <div class="sidebar-item" style="font-size:12px"><div class="sdot" style="background:#d97706"></div>3 idle VMs detected</div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+      <!-- OVERVIEW -->
+      <div class="panel active" id="panel-overview">
+        <div class="kpi-row">
+          <div class="kpi"><div class="kpi-label">MTD Spend</div><div class="kpi-value">$18,420</div><div class="kpi-sub red">▲ 23% vs last month</div></div>
+          <div class="kpi"><div class="kpi-label">Projected Month</div><div class="kpi-value">$24,100</div><div class="kpi-sub red">▲ Over $20k budget</div></div>
+          <div class="kpi"><div class="kpi-label">Potential Savings</div><div class="kpi-value green">$5,180</div><div class="kpi-sub">5 recommendations</div></div>
+          <div class="kpi"><div class="kpi-label">Idle Resources</div><div class="kpi-value red">7</div><div class="kpi-sub" style="color:#888">3 VMs, 2 disks, 2 IPs</div></div>
+        </div>
+
+        <div class="anomaly">
+          <span style="font-size:18px;margin-top:2px">⚠️</span>
+          <div class="anomaly-text"><b>Cost anomaly detected: Storage +340% in 48h</b>Blob storage in eastus2 spiked from $12/day to $53/day. Likely cause: uncompressed log dumps from vm-prod-api-02.</div>
+          <button class="anomaly-btn" onclick="switchTab('chat',null);setTimeout(()=>askQ('Why did my storage costs spike?'),80)">Investigate →</button>
+        </div>
+
+        <div class="section-title">Daily spend — last 14 days</div>
+        <div class="bar-chart" id="spend-chart"></div>
+
+        <div class="section-title" style="margin-top:4px">Top resources by cost</div>
+        <table class="rtable">
+          <thead><tr><th>Resource</th><th>Type</th><th>Cost/mo</th><th>CPU avg</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="resource-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- RECOMMENDATIONS -->
+      <div class="panel" id="panel-recs">
+        <div id="rec-cards"></div>
+      </div>
+
+      <!-- CHAT -->
+      <div class="panel" id="panel-chat" style="height:calc(100vh - 52px - 48px);overflow:hidden;">
+        <div class="chat-wrap">
+          <div class="chat-msgs" id="chat-msgs">
+            <div class="msg">
+              <div class="avatar av-ai">AI</div>
+              <div class="bubble-wrap">
+                <div class="bubble-name">Azure Cost Copilot</div>
+                <div class="bubble">Hi! I've analyzed your Azure subscription. MTD spend is <strong>$18,420</strong> — 23% above last month. Found <strong>5 optimization opportunities</strong> worth up to $5,180/month.<br><br>What would you like to investigate?</div>
+                <div class="chips">
+                  <button class="chip" onclick="askQ('Why is my bill high this month?')">Why is my bill high?</button>
+                  <button class="chip" onclick="askQ('Which VMs are idle?')">Show idle VMs</button>
+                  <button class="chip" onclick="askQ('What can I do to save the most money?')">Top savings?</button>
+                  <button class="chip" onclick="askQ('Why did my storage costs spike?')">Storage spike?</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <input class="chat-input" id="chat-input" placeholder="Ask about your Azure costs..." onkeydown="if(event.key==='Enter')sendMsg()">
+            <button class="send-btn" onclick="sendMsg()">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="panel" id="panel-actions">
+        <div class="section-title" style="margin-bottom:14px">Pending approvals</div>
+        <div id="action-cards"></div>
+        <div class="section-title" style="margin:20px 0 14px">Completed actions (this month)</div>
+        <table class="rtable">
+          <thead><tr><th>Action</th><th>Resource</th><th>Executed</th><th>Savings</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Downsize VM</td><td>vm-dev-test-01</td><td>Apr 3</td><td>$340/mo</td><td><span class="sbadge b-saved">Saved</span></td></tr>
+            <tr><td>Delete orphan disk</td><td>disk-stg-backup-04</td><td>Apr 1</td><td>$92/mo</td><td><span class="sbadge b-saved">Saved</span></td></tr>
+            <tr><td>Schedule shutdown</td><td>vm-dev-qa-02</td><td>Mar 29</td><td>$210/mo</td><td><span class="sbadge b-saved">Saved</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ──
+const resources = [
+  {name:'vm-prod-api-cluster',type:'VM (D8s v3 ×3)',cost:'$3,840',cpu:'78%',status:'active',action:'Review'},
+  {name:'vm-prod-db-primary',type:'VM (E16s v3)',cost:'$2,280',cpu:'61%',status:'active',action:'Review'},
+  {name:'vm-dev-idle-01',type:'VM (D4s v3)',cost:'$620',cpu:'2%',status:'idle',action:'Shutdown'},
+  {name:'vm-dev-idle-02',type:'VM (D4s v3)',cost:'$620',cpu:'1%',status:'idle',action:'Shutdown'},
+  {name:'storage-blob-logs',type:'Blob Storage',cost:'$1,590',cpu:'—',status:'scaled',action:'Investigate'},
+  {name:'sql-prod-analytics',type:'Azure SQL P2',cost:'$1,490',cpu:'18%',status:'idle',action:'Downsize'},
+  {name:'avd-host-pool-01',type:'AVD Session Host',cost:'$760',cpu:'44%',status:'active',action:'Optimize'},
+];
+
+const recs = [
+  {icon:'⬇️',bg:'#fef2f2',title:'Right-size vm-dev-idle-01 and vm-dev-idle-02',sub:'Virtual Machines · East US 2',savings:'$1,240/mo',body:'These VMs have averaged under 3% CPU and 4% memory over 30 days. They appear to be leftover dev/test instances. Downsize from D4s v3 to B2s or schedule auto-shutdown during non-business hours.',conf:'High confidence',confHigh:true},
+  {icon:'📦',bg:'#fef9c3',title:'Enable blob lifecycle policies on storage-blob-logs',sub:'Storage · Blob · East US 2',savings:'$980/mo',body:'Log blobs older than 30 days retained at hot tier. Moving to cool tier after 7 days and archive after 30 days cuts cost by ~62%. Recent spike suggests missing log rotation on vm-prod-api-02.',conf:'High confidence',confHigh:true},
+  {icon:'⚡',bg:'#eff6ff',title:'Switch sql-prod-analytics to serverless tier',sub:'Azure SQL · General Purpose',savings:'$860/mo',body:'Query analytics show this database is only active between 9am–6pm weekdays. Switching to serverless auto-pause (pause after 1h idle) eliminates idle compute cost with no working-hours impact.',conf:'Medium confidence',confHigh:false},
+  {icon:'💡',bg:'#f0fdf4',title:'Purchase Reserved Instances for prod cluster',sub:'Virtual Machines · D8s v3',savings:'$1,480/mo',body:'vm-prod-api-cluster has run continuously for 8+ months. A 1-year reserved instance commitment reduces cost from $3,840/mo to $2,360/mo — a 38% discount with zero configuration changes needed.',conf:'High confidence',confHigh:true},
+  {icon:'🌐',bg:'#fef9c3',title:'Release 2 unused public IP addresses',sub:'Networking · Static IPs',savings:'$620/mo',body:'Two static public IPs are allocated but unassociated with any running resource. These were likely attached to VMs that have since been deleted. Releasing them has no operational impact.',conf:'High confidence',confHigh:true},
+];
+
+const actions = [
+  {title:'Schedule shutdown: vm-dev-idle-01 & 02',detail:'Auto-shutdown at 7pm, restart at 8am weekdays · saves $1,240/mo'},
+  {title:'Apply lifecycle policy to storage-blob-logs',detail:'Cool tier after 7d, archive after 30d · saves $980/mo'},
+  {title:'Release 2 unused static IPs',detail:'No operational impact · saves $620/mo immediately'},
+];
+
+const aiAnswers = {
+  'Why is my bill high this month?': 'Three main drivers pushing costs up this month:\n\n<b>1. Storage spike (+340%)</b> — Blob storage jumped from ~$12/day to $53/day in 48h. Root cause: uncompressed log dumps from vm-prod-api-02 after a misconfigured log4j appender.\n\n<b>2. 3 idle VMs</b> — vm-dev-idle-01, 02, and sql-prod-analytics running at under 3% CPU: ~$1,860/mo wasted.\n\n<b>3. No Reserved Instances</b> — Your prod API cluster is on pay-as-you-go. A 1-year reservation saves $1,480/mo with zero changes.\n\nFixing all three brings projected spend from $24,100 down to ~<b>$17,400</b>.',
+  'Which VMs are idle?': 'Found <b>3 significantly underutilized VMs:</b>\n\n• <b>vm-dev-idle-01</b> (D4s v3) — 2% avg CPU, $620/mo. Zero production traffic in 30 days.\n• <b>vm-dev-idle-02</b> (D4s v3) — 1% avg CPU, $620/mo. Same pattern — likely forgotten dev instance.\n• <b>sql-prod-analytics</b> — 18% avg CPU but only active 9am–6pm weekdays. Switchable to serverless for $630/mo.\n\nCombined savings if actioned: <b>$1,860/mo</b>.',
+  'What can I do to save the most money?': 'Savings ranked by impact:\n\n1. <b>Reserved Instances</b> for prod cluster → $1,480/mo\n2. <b>Downsize/schedule idle VMs</b> → $1,240/mo\n3. <b>Blob lifecycle policies</b> → $980/mo\n4. <b>Serverless SQL tier</b> → $860/mo\n5. <b>Release unused IPs</b> → $620/mo\n\n<b>Total potential: $5,180/mo</b> — enough to offset your entire storage and networking budget.',
+  'Why did my storage costs spike?': 'The storage spike started <b>April 6 at 3:17am UTC</b>.\n\nvm-prod-api-02 began writing uncompressed logs to Blob storage after a misconfigured log4j appender lost its compression setting in the last deploy. Normal volume: ~800MB/day. Post-deploy: 14GB/day.\n\n<b>Recommended fix:</b>\n1. Re-enable gzip compression in your log4j config\n2. Apply blob lifecycle policy: cool after 7 days, archive after 30\n3. Set a storage budget alert at $30/day for this container\n\nEstimated extra cost if unresolved this month: +$1,200.',
+};
+
+// ── Render functions ──
+function renderChart() {
+  const vals = [510,490,580,620,540,560,590,610,670,720,810,780,850,920];
+  const max = Math.max(...vals);
+  const el = document.getElementById('spend-chart');
+  el.innerHTML = vals.map((v, i) => {
+    const h = Math.round(v / max * 65);
+    const isLast = i === vals.length - 1;
+    return `<div class="bar-col">
+      <div class="bar-val">$${v}</div>
+      <div class="bar" style="height:${h}px;background:${isLast ? '#2563eb' : '#d1d5db'}"></div>
+      <div class="bar-lbl">D${i+1}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderResources() {
+  const statusMap = { active: 'b-active', idle: 'b-idle', scaled: 'b-scaled' };
+  document.getElementById('resource-tbody').innerHTML = resources.map(r =>
+    `<tr>
+      <td style="font-weight:600">${r.name}</td>
+      <td style="color:#888;font-size:12px">${r.type}</td>
+      <td style="font-weight:600">${r.cost}</td>
+      <td>${r.cpu}</td>
+      <td><span class="sbadge ${statusMap[r.status]}">${r.status}</span></td>
+      <td><button class="abtn${r.action==='Shutdown'||r.action==='Downsize'?' exec':''}" onclick="handleAction('${r.name}','${r.action}')">${r.action}</button></td>
+    </tr>`
+  ).join('');
+}
+
+function renderRecs() {
+  document.getElementById('rec-cards').innerHTML = recs.map((r, i) =>
+    `<div class="rec-card" id="rec-${i}">
+      <div class="rec-header">
+        <div class="rec-icon" style="background:${r.bg}">${r.icon}</div>
+        <div style="flex:1">
+          <div class="rec-title">${r.title}</div>
+          <div class="rec-sub">${r.sub}</div>
+        </div>
+        <div class="rec-savings">
+          <div class="rec-amount">${r.savings}</div>
+          <div class="rec-lbl">potential savings</div>
+        </div>
+      </div>
+      <div class="rec-body">${r.body}</div>
+      <div class="rec-footer">
+        <span class="conf-badge${r.confHigh?' conf-high':''}">${r.conf}</span>
+        <button class="dismiss-btn" onclick="document.getElementById('rec-${i}').style.display='none'">Dismiss</button>
+        <button class="approve-btn" onclick="this.textContent='✓ Done';this.disabled=true;this.style.background='#dcfce7'">Approve & Execute</button>
+      </div>
+    </div>`
+  ).join('');
+}
+
+function renderActions() {
+  document.getElementById('action-cards').innerHTML = actions.map((a, i) =>
+    `<div class="action-card" id="act-${i}">
+      <div class="action-info">
+        <div class="action-title">${a.title}</div>
+        <div class="action-detail">${a.detail}</div>
+      </div>
+      <button class="dismiss-btn" onclick="document.getElementById('act-${i}').remove()">Dismiss</button>
+      <button class="approve-btn" onclick="this.textContent='✓ Executed';this.disabled=true;this.style.background='#dcfce7'">Approve & Execute</button>
+    </div>`
+  ).join('');
+}
+
+// ── Tab switching ──
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  else document.querySelectorAll('.tab').forEach((t, i) => {
+    if (['overview','recs','chat','actions'][i] === name) t.classList.add('active');
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ── Chat ──
+function fmt(t) { return t.replace(/\n/g, '<br>'); }
+
+function addMsg(role, text) {
+  const msgs = document.getElementById('chat-msgs');
+  const isUser = role === 'user';
+  const d = document.createElement('div');
+  d.className = 'msg' + (isUser ? ' user' : '');
+  d.innerHTML = `
+    <div class="avatar ${isUser ? 'av-user' : 'av-ai'}">${isUser ? 'You' : 'AI'}</div>
+    <div class="bubble-wrap">
+      <div class="bubble-name">${isUser ? 'You' : 'Azure Cost Copilot'}</div>
+      <div class="bubble">${fmt(text)}</div>
+    </div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chat-msgs');
+  const d = document.createElement('div');
+  d.className = 'msg'; d.id = 'typing-ind';
+  d.innerHTML = `<div class="avatar av-ai">AI</div><div class="bubble-wrap"><div class="bubble-name">Azure Cost Copilot</div><div class="bubble" style="padding:12px 16px"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() { const e = document.getElementById('typing-ind'); if (e) e.remove(); }
+
+function askQ(q) {
+  switchTab('chat', null);
+  addMsg('user', q);
+  showTyping();
+  const answer = aiAnswers[q] || 'I\'ve analyzed your Azure environment for that query. Based on current usage patterns, this area looks within normal parameters. Would you like me to dig deeper into a specific resource group or check for related recommendations?';
+  setTimeout(() => { removeTyping(); addMsg('ai', answer); }, 1100);
+}
+
+function sendMsg() {
+  const inp = document.getElementById('chat-input');
+  const q = inp.value.trim();
+  if (!q) return;
+  inp.value = '';
+  askQ(q);
+}
+
+function handleAction(name, action) {
+  switchTab('chat', null);
+  setTimeout(() => askQ(`How do I ${action.toLowerCase()} ${name}?`), 80);
+}
+
+// ── Init ──
+renderChart();
+renderResources();
+renderRecs();
+renderActions();
+</script>
+</body>
+</html>

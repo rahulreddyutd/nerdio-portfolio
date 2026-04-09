@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AVD Optimization Platform | PM Portfolio</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;gap:12px;padding:0 20px;height:52px}
+.tb-title{font-size:15px;font-weight:600}
+.pill{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600}
+.pill-blue{background:#dbeafe;color:#1e40af}
+.pill-green{background:#dcfce7;color:#166534}
+.tab-bar{background:#fff;border-bottom:1px solid #e5e5e5;display:flex;padding:0 20px}
+.tab{padding:12px 18px;font-size:13px;cursor:pointer;color:#666;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab:hover{color:#1a1a1a}
+.tab.active{color:#2563eb;font-weight:600;border-bottom-color:#2563eb}
+.panel{display:none;padding:20px}
+.panel.active{display:block}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:13px}
+.kl{font-size:11px;color:#888;margin-bottom:4px;font-weight:500}
+.kv{font-size:20px;font-weight:700}
+.ks{font-size:11px;margin-top:3px}
+.st{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.host-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.host-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:15px}
+.hh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hn{font-size:13px;font-weight:600}
+.hsbadge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
+.hs-run{background:#dcfce7;color:#166534}
+.hs-drain{background:#fef9c3;color:#854d0e}
+.hs-stop{background:#f3f4f6;color:#888}
+.prog-row{margin-bottom:7px}
+.prog-lbl{display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:3px}
+.prog-bar{height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px}
+.rec-card{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:15px;margin-bottom:12px}
+.rec-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.rec-body{font-size:12px;color:#555;line-height:1.5;margin-bottom:10px}
+.rbtn{font-size:12px;padding:6px 14px;border-radius:20px;border:1px solid #93c5fd;background:#fff;color:#1d4ed8;cursor:pointer;font-weight:600;margin-right:8px}
+.rbtn:hover{background:#dbeafe}
+.warn-card{background:#fef9c3;border-color:#fde68a}
+.warn-card .rec-title{color:#854d0e}
+.slider-row{margin-bottom:16px}
+.slider-lbl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}
+.slider-lbl span{font-weight:600;color:#2563eb}
+input[type=range]{width:100%;cursor:pointer;accent-color:#2563eb}
+.sim-out{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:16px;margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sim-stat{text-align:center}
+.sim-val{font-size:22px;font-weight:700}
+.sim-lbl{font-size:11px;color:#888;margin-top:2px}
+.pol-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px;margin-bottom:10px}
+.pol-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.pol-name{font-size:13px;font-weight:600}
+.toggle{width:38px;height:21px;background:#d1d5db;border-radius:11px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:#2563eb}
+.toggle::after{content:"";position:absolute;width:15px;height:15px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s}
+.toggle.on::after{left:20px}
+.hm{display:grid;grid-template-columns:repeat(24,1fr);gap:2px}
+.hm-cell{height:30px;border-radius:2px}
+.hm-labels{display:grid;grid-template-columns:repeat(24,1fr);margin-top:3px}
+.hm-labels div{font-size:9px;color:#bbb;text-align:center}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="width:28px;height:28px;background:#dbeafe;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px">&#128421;</div>
+  <div class="tb-title">AVD Optimization Platform</div>
+  <div class="pill pill-blue">East US 2</div>
+  <div class="pill pill-green">Auto-scale: On</div>
+  <div style="margin-left:auto;font-size:12px;color:#666">Host pool: <b>WVD-PROD-POOL-01</b> &middot; 6 hosts &middot; 84 sessions</div>
+</div>
+<div class="tab-bar">
+  <div class="tab active" onclick="sw('dashboard',this)">Dashboard</div>
+  <div class="tab" onclick="sw('hosts',this)">Session Hosts</div>
+  <div class="tab" onclick="sw('optimizer',this)">Optimizer</div>
+  <div class="tab" onclick="sw('policies',this)">Scaling Policies</div>
+</div>
+
+<div class="panel active" id="tab-dashboard">
+  <div class="kpi-row">
+    <div class="kpi"><div class="kl">Active sessions</div><div class="kv">84</div><div class="ks" style="color:#2563eb">Peak: 110 (10am)</div></div>
+    <div class="kpi"><div class="kl">Session density</div><div class="kv" style="color:#16a34a">14/host</div><div class="ks" style="color:#16a34a">+40% vs baseline</div></div>
+    <div class="kpi"><div class="kl">Hosts running</div><div class="kv">6 <span style="font-size:14px;color:#888">/8</span></div><div class="ks" style="color:#16a34a">2 stopped (off-hours)</div></div>
+    <div class="kpi"><div class="kl">Cost today</div><div class="kv">$94</div><div class="ks" style="color:#16a34a">&#8595; 28% vs unoptimized</div></div>
+    <div class="kpi"><div class="kl">Avg logon time</div><div class="kv">22s</div><div class="ks" style="color:#16a34a">Excellent</div></div>
+  </div>
+  <div class="st">Session load heatmap &mdash; today (by hour)</div>
+  <div class="hm" id="heatmap"></div>
+  <div class="hm-labels" id="hm-labels"></div>
+  <div style="margin-top:20px" class="st">Smart scaling recommendations</div>
+  <div class="rec-card">
+    <div class="rec-title">Scale down 1 host at 6pm &mdash; 94% confidence</div>
+    <div class="rec-body">Session load forecast drops below 60 users at 5:45pm. Draining avd-host-06 saves ~$31 tonight. No session disruption &mdash; users migrate automatically.</div>
+    <button class="rbtn" onclick="this.textContent='&#10003; Scheduled'">Schedule drain at 5:45pm</button>
+    <button class="rbtn" style="border-color:#d1d5db;color:#666" onclick="this.parentElement.style.display='none'">Dismiss</button>
+  </div>
+  <div class="rec-card warn-card">
+    <div class="rec-title">Pre-warm 2 hosts at 7:30am tomorrow</div>
+    <div class="rec-body">Forecast shows 90+ concurrent sessions by 8:15am (all-hands day). Starting hosts 45 minutes early ensures zero wait time for users logging in.</div>
+    <button class="rbtn" style="border-color:#fde68a;color:#854d0e" onclick="this.textContent='&#10003; Scheduled'">Schedule pre-warm</button>
+  </div>
+</div>
+
+<div class="panel" id="tab-hosts"><div class="host-grid" id="host-grid"></div></div>
+
+<div class="panel" id="tab-optimizer">
+  <div class="st">What-if simulation &mdash; adjust parameters to see cost/performance impact</div>
+  <div class="slider-row"><div class="slider-lbl">Max sessions per host <span id="dv">14</span></div><input type="range" min="6" max="20" value="14" id="ds" oninput="upd()"></div>
+  <div class="slider-row"><div class="slider-lbl">Scale-in threshold (% CPU) <span id="cv">30%</span></div><input type="range" min="10" max="60" value="30" id="cs" oninput="upd()"></div>
+  <div class="slider-row"><div class="slider-lbl">Off-hours shutdown window <span id="hv">7pm&ndash;7am</span></div><input type="range" min="0" max="8" value="4" id="hs" oninput="upd()"></div>
+  <div class="sim-out">
+    <div class="sim-stat"><div class="sim-val" id="sh">6</div><div class="sim-lbl">Hosts needed</div></div>
+    <div class="sim-stat"><div class="sim-val" id="sc" style="color:#16a34a">$94</div><div class="sim-lbl">Est. daily cost</div></div>
+    <div class="sim-stat"><div class="sim-val" id="sv" style="color:#16a34a">28%</div><div class="sim-lbl">vs unoptimized</div></div>
+  </div>
+  <p style="margin-top:14px;font-size:13px;color:#666">Higher session density reduces host count and cost, but may impact user experience if set too aggressively.</p>
+</div>
+
+<div class="panel" id="tab-policies"><div class="st">Active scaling policies</div><div id="pol-list"></div></div>
+
+<script>
+var hosts=[{n:"avd-host-01",s:"run",se:15,mx:16,c:82,m:74,u:"18h"},{n:"avd-host-02",s:"run",se:15,mx:16,c:79,m:71,u:"18h"},{n:"avd-host-03",s:"run",se:14,mx:16,c:75,m:68,u:"12h"},{n:"avd-host-04",s:"run",se:14,mx:16,c:73,m:65,u:"12h"},{n:"avd-host-05",s:"run",se:13,mx:16,c:68,m:62,u:"8h"},{n:"avd-host-06",s:"drain",se:13,mx:16,c:65,m:60,u:"6h"},{n:"avd-host-07",s:"stop",se:0,mx:16,c:0,m:0,u:"--"},{n:"avd-host-08",s:"stop",se:0,mx:16,c:0,m:0,u:"--"}];
+var pols=[{n:"Business hours pre-warm",d:"Start 2 hosts at 7:30am Mon-Fri. Ensures capacity for morning rush.",o:true},{n:"Off-hours scale-in",d:"Drain and stop idle hosts after 7pm. Auto-restart next business day.",o:true},{n:"Load-based auto-scale",d:"Add host when avg session load >80%, remove when <30% for 15min.",o:true},{n:"Weekend shutdown",d:"Stop all non-essential hosts Saturday 8pm through Monday 6am.",o:true},{n:"Meeting surge protection",d:"Pre-warm +2 hosts 30min before calendar block with >50 attendees.",o:false},{n:"Spot instance fallback",d:"Use Azure Spot VMs for dev/test pool to reduce cost by ~70%.",o:false}];
+
+function rHosts(){
+  var el=document.getElementById("host-grid");
+  el.innerHTML=hosts.map(function(h){
+    var sc=h.s==="run"?"hs-run":h.s==="drain"?"hs-drain":"hs-stop";
+    var sl=h.s==="run"?"running":h.s==="drain"?"draining":"stopped";
+    var cf=h.c>75?"#dc2626":h.c>50?"#d97706":"#2563eb";
+    var dots=h.s==="stop"
+      ? '<span style="font-size:11px;color:#bbb">Stopped</span>'
+      : Array(h.mx).fill(0).map(function(_,i){
+          return '<div style="width:8px;height:8px;border-radius:50%;display:inline-block;background:'+(i<h.se?"#2563eb":"#e5e5e5")+';margin:1px"></div>';
+        }).join("");
+    var bars=h.s!=="stop"
+      ? '<div class="prog-row"><div class="prog-lbl"><span>CPU</span><span>'+h.c+'%</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+h.c+'%;background:'+cf+'"></div></div></div>'
+        +'<div class="prog-row"><div class="prog-lbl"><span>Memory</span><span>'+h.m+'%</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+h.m+'%;background:#2563eb"></div></div></div>'
+        +'<div class="prog-row"><div class="prog-lbl"><span>Sessions</span><span>'+h.se+'/'+h.mx+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+Math.round(h.se/h.mx*100)+'%;background:#16a34a"></div></div></div>'
+      : "";
+    return '<div class="host-card"><div class="hh"><div class="hn">'+h.n+'</div><div class="hsbadge '+sc+'">'+sl+'</div></div>'+bars+'<div style="margin-top:8px">'+dots+'</div><div style="font-size:11px;color:#bbb;margin-top:8px">Uptime: '+h.u+'</div></div>';
+  }).join("");
+}
+
+function rHeatmap(){
+  var vals=[0,0,1,2,4,8,22,55,88,105,110,108,95,90,84,78,68,55,38,20,12,5,2,0];
+  var max=110;
+  document.getElementById("heatmap").innerHTML=vals.map(function(v,i){
+    var p=v/max;
+    var r=Math.min(255,Math.round(56+p*182));
+    var g=Math.min(153,Math.round(p>0.5?(1-(p-.5)*2)*153+10:153));
+    var b=Math.min(255,Math.round((1-p)*230+20));
+    return '<div class="hm-cell" style="background:rgb('+r+','+g+','+b+')" title="'+v+' sessions at '+i+':00"></div>';
+  }).join("");
+  document.getElementById("hm-labels").innerHTML=Array.from({length:24},function(_,i){
+    return "<div>"+(i%4===0?i+"h":"")+"</div>";
+  }).join("");
+}
+
+function rPolicies(){
+  document.getElementById("pol-list").innerHTML=pols.map(function(p,i){
+    return '<div class="pol-card"><div class="pol-hdr"><div class="pol-name">'+p.n+'</div>'
+      +'<div class="toggle'+(p.o?" on":"")+'" id="t'+i+'" onclick="pols['+i+'].o=!pols['+i+'].o;this.classList.toggle(\'on\',pols['+i+'].o)"></div></div>'
+      +'<div style="font-size:12px;color:#666">'+p.d+'</div></div>';
+  }).join("");
+}
+
+function upd(){
+  var d=parseInt(document.getElementById("ds").value);
+  var c=parseInt(document.getElementById("cs").value);
+  var h=parseInt(document.getElementById("hs").value);
+  document.getElementById("dv").textContent=d;
+  document.getElementById("cv").textContent=c+"%";
+  var hrs=["6pm-6am","6pm-7am","7pm-7am","7pm-8am","8pm-8am","8pm-9am","9pm-9am","9pm-10am","10pm-10am"];
+  document.getElementById("hv").textContent=hrs[h];
+  var hn=Math.ceil(110/d);
+  var cost=Math.round(130*(1-(6+h)/24*0.45-(c/100)*0.12)*(hn/8));
+  var save=Math.round((1-cost/130)*100);
+  document.getElementById("sh").textContent=hn;
+  document.getElementById("sc").textContent="$"+cost;
+  document.getElementById("sv").textContent=Math.max(0,save)+"%";
+  document.getElementById("sv").style.color=save>20?"#16a34a":save>0?"#d97706":"#dc2626";
+}
+
+function sw(n,el){
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active")});
+  if(el)el.classList.add("active");
+  document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("active")});
+  document.getElementById("tab-"+n).classList.add("active");
+}
+
+rHeatmap();
+rHosts();
+rPolicies();
+</script>
+</body>
+</html>

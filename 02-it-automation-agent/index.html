@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Workflow Automation Agent | PM Portfolio</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+  .shell { display: grid; grid-template-columns: 270px 1fr; grid-template-rows: 52px 72px 1fr; height: 100vh; }
+  .topbar { grid-column: 1/-1; background: #fff; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; gap: 12px; padding: 0 20px; }
+  .topbar-logo { width: 28px; height: 28px; background: #fef9c3; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .topbar-title { font-size: 15px; font-weight: 600; }
+  .pill { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 600; }
+  .pill-green { background: #dcfce7; color: #166534; }
+  .pill-red { background: #fef2f2; color: #dc2626; }
+  .pill-amber { background: #fef9c3; color: #854d0e; }
+  .kpi-strip { grid-column: 1/-1; background: #fff; border-bottom: 1px solid #e5e5e5; display: flex; gap: 0; }
+  .kpi-item { flex: 1; padding: 14px 20px; border-right: 1px solid #f0f0f0; text-align: center; }
+  .kpi-item:last-child { border-right: none; }
+  .kpi-val { font-size: 20px; font-weight: 700; }
+  .kpi-lbl { font-size: 11px; color: #888; margin-top: 2px; }
+  .sidebar { background: #fafafa; border-right: 1px solid #e5e5e5; overflow-y: auto; }
+  .sidebar-hdr { padding: 14px 16px 6px; font-size: 10px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: .08em; }
+  .ticket { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background .12s; }
+  .ticket:hover { background: #f0f0f0; }
+  .ticket.active { background: #fff; border-left: 2px solid #2563eb; }
+  .ticket-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ticket-meta { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #888; }
+  .prio-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .main { display: flex; flex-direction: column; overflow: hidden; background: #fff; }
+  .detail-hdr { padding: 16px 20px; border-bottom: 1px solid #e5e5e5; flex-shrink: 0; }
+  .detail-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .detail-meta { display: flex; gap: 10px; align-items: center; font-size: 12px; color: #888; }
+  .agent-area { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .agent-msg { display: flex; gap: 10px; }
+  .ag-av { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .av-ai { background: #dbeafe; color: #1e40af; }
+  .av-sys { background: #fef9c3; color: #854d0e; }
+  .av-user { background: #f3f4f6; color: #555; }
+  .msg-wrap { flex: 1; }
+  .msg-role { font-size: 11px; color: #bbb; margin-bottom: 4px; }
+  .msg-content { font-size: 13px; line-height: 1.6; border-radius: 12px; padding: 11px 15px; }
+  .c-ai { background: #eff6ff; color: #1e3a8a; }
+  .c-sys { background: #fef9c3; color: #78350f; }
+  .c-user { background: #f3f4f6; color: #1a1a1a; }
+  .c-success { background: #f0fdf4; color: #14532d; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .abtn { font-size: 12px; padding: 7px 16px; border-radius: 20px; border: 1px solid; background: transparent; cursor: pointer; font-weight: 600; transition: background .12s; }
+  .abtn-blue { border-color: #93c5fd; color: #1d4ed8; }
+  .abtn-blue:hover { background: #dbeafe; }
+  .abtn-green { border-color: #86efac; color: #166534; }
+  .abtn-green:hover { background: #dcfce7; }
+  .abtn-gray { border-color: #d1d5db; color: #555; }
+  .abtn-gray:hover { background: #f3f4f6; }
+  .step-list { margin-top: 10px; display: flex; flex-direction: column; gap: 7px; }
+  .step { display: flex; align-items: center; gap: 9px; font-size: 12px; }
+  .step-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; font-weight: 700; }
+  .si-pending { background: #f3f4f6; color: #999; }
+  .si-running { background: #fef9c3; color: #854d0e; }
+  .si-done { background: #dcfce7; color: #166534; }
+  .input-bar { display: flex; gap: 8px; padding: 12px 20px; border-top: 1px solid #e5e5e5; flex-shrink: 0; }
+  .input-bar input { flex: 1; padding: 9px 15px; border: 1px solid #d1d5db; border-radius: 22px; font-size: 13px; background: #fff; color: #1a1a1a; outline: none; font-family: inherit; }
+  .input-bar input:focus { border-color: #2563eb; }
+  .input-bar button { padding: 9px 20px; border-radius: 22px; border: none; background: #2563eb; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid #fef9c3; border-top-color: #d97706; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 4px; }
+  .empty-state { text-align: center; color: #bbb; font-size: 13px; padding: 60px 20px; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="topbar-logo">⚡</div>
+    <div class="topbar-title">IT Workflow Automation Agent</div>
+    <div class="pill pill-green">● Agent Online</div>
+    <div style="margin-left:auto;display:flex;gap:20px;font-size:12px;color:#666">
+      <span>Open <b style="color:#1a1a1a">8</b></span>
+      <span>Resolved today <b style="color:#1a1a1a">14</b></span>
+      <span>Auto-resolved <b style="color:#166534">71%</b></span>
+    </div>
+  </div>
+  <div class="kpi-strip">
+    <div class="kpi-item"><div class="kpi-val" style="color:#16a34a">4.2m</div><div class="kpi-lbl">Avg MTTR</div></div>
+    <div class="kpi-item"><div class="kpi-val">71%</div><div class="kpi-lbl">Auto-resolved</div></div>
+    <div class="kpi-item"><div class="kpi-val" style="color:#dc2626">3</div><div class="kpi-lbl">High priority</div></div>
+    <div class="kpi-item"><div class="kpi-val">$0</div><div class="kpi-lbl">Escalation cost</div></div>
+    <div class="kpi-item"><div class="kpi-val" style="color:#2563eb">8</div><div class="kpi-lbl">Open tickets</div></div>
+  </div>
+  <div class="sidebar">
+    <div class="sidebar-hdr">Open Tickets</div>
+    <div id="ticket-list"></div>
+  </div>
+  <div class="main">
+    <div class="detail-hdr">
+      <div class="detail-title" id="detail-title">Select a ticket to begin</div>
+      <div class="detail-meta" id="detail-meta"><span style="color:#bbb">Click any ticket on the left to see the AI agent work in real time</span></div>
+    </div>
+    <div class="agent-area" id="agent-area">
+      <div class="empty-state">Select a ticket from the left panel to see the AI agent analyze and resolve it in real time.</div>
+    </div>
+    <div class="input-bar" id="input-bar" style="display:none">
+      <input id="cmd-input" placeholder="Type a command or question for the agent..." onkeydown="if(event.key==='Enter')sendCmd()">
+      <button onclick="sendCmd()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const tickets = [
+  {id:'TKT-1041',title:'User cannot log in — MFA failure',user:'Sarah Chen',dept:'Finance',prio:'high',time:'2m ago',tag:'auth'},
+  {id:'TKT-1040',title:'VM vm-dev-03 unresponsive after update',user:'Marco Reyes',dept:'Engineering',prio:'high',time:'8m ago',tag:'vm'},
+  {id:'TKT-1039',title:'License not assigned — Adobe CC',user:'Jess Williams',dept:'Marketing',prio:'med',time:'15m ago',tag:'license'},
+  {id:'TKT-1038',title:'Password reset request',user:'Tom Blake',dept:'HR',prio:'low',time:'22m ago',tag:'password'},
+  {id:'TKT-1037',title:'New employee onboarding setup',user:'Priya Nair',dept:'Sales',prio:'med',time:'1h ago',tag:'onboard'},
+  {id:'TKT-1036',title:'Shared mailbox access denied',user:'Carlos Diaz',dept:'Legal',prio:'med',time:'1h ago',tag:'mail'},
+  {id:'TKT-1035',title:'Software install request — Figma',user:'Anna Kim',dept:'Design',prio:'low',time:'2h ago',tag:'software'},
+  {id:'TKT-1034',title:'VPN connectivity issues',user:'Ben Hart',dept:'Remote',prio:'high',time:'3h ago',tag:'vpn'},
+];
+
+const playbooks = {
+  auth: {
+    analyze: 'Analyzing MFA failure for Sarah Chen...\n\n<b>Findings:</b>\n• Last successful login: April 7, 9:14am\n• Failed MFA attempts: 6 in last 2 hours\n• Authenticator app token: out of sync by 4 minutes\n• Account not locked — no brute-force detected\n\n<b>Root cause:</b> Authenticator app time drift (common after phone battery replacement).',
+    steps: [{label:'Verify identity via employee directory',ms:800},{label:'Pull Azure AD sign-in logs (last 24h)',ms:1200},{label:'Check MFA device registration',ms:900},{label:'Force MFA re-registration token',ms:1100},{label:'Send setup link to sarah.chen@company.com',ms:700},{label:'Notify user via Teams message',ms:500}],
+    resolved: 'MFA issue resolved. Sent re-registration link to Sarah via email and Teams. She will be back online in ~3 minutes.\n\n<b>MTTR: 2m 18s</b> · Auto-resolved · No escalation needed.'
+  },
+  vm: {
+    analyze: 'VM vm-dev-03 unresponsive. Connecting to Azure Resource Manager...\n\n<b>Findings:</b>\n• VM state: Running (OS layer unresponsive)\n• Last heartbeat: 8 minutes ago\n• CPU: 100% (kernel hang suspected)\n• Recent event: Windows Update KB5034441 applied 12m ago\n• 3 similar VMs affected by same KB this month\n\n<b>Root cause:</b> Post-update kernel hang — known issue with KB5034441 on Windows Server 2022.',
+    steps: [{label:'Connect to Azure Resource Manager',ms:900},{label:'Pull VM diagnostics and recent events',ms:1200},{label:'Attempt soft restart via Azure API',ms:2000},{label:'Monitor boot sequence',ms:1500},{label:'Verify services online post-restart',ms:1000},{label:'Flag KB5034441 for policy exclusion',ms:600}],
+    resolved: 'vm-dev-03 is back online. Restart completed in 47 seconds. All services healthy.\n\nCreated Change Advisory to exclude KB5034441 from auto-update policy across dev VMs.\n\n<b>MTTR: 6m 42s</b> · Partially automated · Update policy flagged.'
+  },
+  license: {
+    analyze: 'License request for Jess Williams. Checking Microsoft 365 admin center...\n\n<b>Findings:</b>\n• Jess joined Marketing 3 days ago\n• Current licenses: M365 Business Basic only\n• Adobe CC: 2 unassigned seats available in Marketing pool\n• Requires manager approval (requests over $30/mo)\n• Manager: Rachel Park — online now',
+    steps: [{label:'Look up user in Azure AD directory',ms:700},{label:'Check available license inventory',ms:900},{label:'Verify department budget allocation',ms:800},{label:'Request approval from Rachel Park via Teams',ms:600},{label:'Assign Adobe CC license on approval',ms:1000},{label:'Send welcome and setup guide to Jess',ms:500}],
+    resolved: 'Adobe CC license assigned to Jess Williams. Rachel Park approved via Teams in 1m 12s.\n\n<b>MTTR: 3m 58s</b> · Approval workflow automated · License from existing pool.'
+  },
+  password: {
+    analyze: 'Standard password reset for Tom Blake (HR).\n\n<b>Findings:</b>\n• Account active, not locked\n• Last reset: 90 days ago (at policy threshold)\n• Identity verified via employee ID on file\n• Self-service portal available — user likely unaware',
+    steps: [{label:'Verify identity against HR records',ms:600},{label:'Check account status in Azure AD',ms:700},{label:'Generate temporary password (policy-compliant)',ms:400},{label:'Force password change on next login',ms:500},{label:'Send credentials via secure SMS',ms:600},{label:'Send self-service portal link for future use',ms:400}],
+    resolved: 'Password reset complete. Temporary credentials sent to Tom\'s mobile on file. Also sent self-service portal link to prevent future tickets.\n\n<b>MTTR: 1m 44s</b> · Fully automated · Deflection tip sent.'
+  },
+  onboard: {
+    analyze: 'New employee onboarding: Priya Nair, Sales, starting Monday.\n\n<b>Checklist required:</b>\n• Azure AD account creation\n• M365 license (Business Standard)\n• Salesforce CRM access (Sales role)\n• Slack and Teams setup\n• Laptop provisioning order (IT depot)\n• Security awareness training enrollment',
+    steps: [{label:'Create Azure AD account (priya.nair@company.com)',ms:900},{label:'Assign M365 Business Standard license',ms:700},{label:'Provision Salesforce with Sales role',ms:1100},{label:'Add to Slack and Teams org channels',ms:800},{label:'Submit laptop order to IT depot',ms:600},{label:'Enroll in security awareness training',ms:500}],
+    resolved: 'Onboarding complete for Priya Nair. All 6 tasks done. Manager David Osei notified via email. Laptop ships Wednesday, arrives Friday before start date.\n\n<b>MTTR: 8m 03s</b> · Fully automated · 6/6 tasks complete.'
+  },
+  mail: {
+    analyze: 'Shared mailbox access denied for Carlos Diaz (Legal).\n\n<b>Findings:</b>\n• Mailbox: legal-shared@company.com\n• Carlos\'s role: Legal Counsel — should have access\n• Permission group: Legal-Mailbox-Access\n• Carlos missing from group (likely not added at onboarding)',
+    steps: [{label:'Verify Carlos role and clearance level',ms:700},{label:'Check legal-shared mailbox permissions',ms:900},{label:'Add Carlos to Legal-Mailbox-Access group',ms:800},{label:'Propagate permissions via Exchange Online',ms:1200},{label:'Confirm access in Outlook Web',ms:600}],
+    resolved: 'Carlos Diaz now has access to legal-shared@company.com. Also flagged onboarding checklist — Legal Counsel role was missing the mailbox permission step.\n\n<b>MTTR: 3m 22s</b> · Fully automated · Onboarding gap logged.'
+  },
+  software: {
+    analyze: 'Software install request: Figma for Anna Kim (Design).\n\n<b>Findings:</b>\n• Figma: on approved software list\n• Figma is SaaS — no installation needed\n• Company has 5 available Figma seats in Design pool\n• Can provision immediately',
+    steps: [{label:'Check software approval list',ms:500},{label:'Verify Figma seat availability',ms:700},{label:'Create Figma account (anna.kim@company.com)',ms:900},{label:'Add to Design team workspace',ms:600},{label:'Send invite and quick start guide',ms:400}],
+    resolved: 'Figma access provisioned for Anna Kim. She has been added to the Design workspace and will receive an email invite within 2 minutes.\n\n<b>MTTR: 1m 58s</b> · Fully automated · No install needed (SaaS).'
+  },
+  vpn: {
+    analyze: 'VPN connectivity issues for Ben Hart (Remote).\n\n<b>Findings:</b>\n• VPN client: Cisco AnyConnect 4.10.07073\n• Azure MFA: working correctly\n• Likely cause: Split tunnel policy conflict after last endpoint update\n• 2 other remote employees reported same issue today',
+    steps: [{label:'Pull endpoint management logs via Intune',ms:900},{label:'Check VPN gateway health in Azure',ms:800},{label:'Identify policy conflict in Intune config',ms:1200},{label:'Push corrected split-tunnel policy',ms:1000},{label:'Instruct Ben to reconnect VPN',ms:400},{label:'Verify connectivity via ping test',ms:700}],
+    resolved: 'VPN issue resolved for Ben Hart and 2 other affected users. Root cause: split-tunnel policy had incorrect route exclusion after last Intune profile update. Pushed corrected policy to all remote corp devices.\n\n<b>MTTR: 5m 11s</b> · Policy fix auto-deployed · 3 users unblocked.'
+  }
+};
+
+let running = false;
+
+function renderTickets() {
+  const el = document.getElementById('ticket-list');
+  const prioColor = { high: '#dc2626', med: '#d97706', low: '#16a34a' };
+  el.innerHTML = tickets.map((t, i) =>
+    `<div class="ticket" id="tkt-${i}" onclick="selectTicket(${i})">
+      <div class="ticket-title">${t.title}</div>
+      <div class="ticket-meta">
+        <div class="prio-dot" style="background:${prioColor[t.prio]}"></div>
+        <span>${t.id}</span>·<span>${t.user}</span>·<span>${t.time}</span>
+      </div>
+    </div>`
+  ).join('');
+}
+
+function selectTicket(i) {
+  if (running) return;
+  document.querySelectorAll('.ticket').forEach(t => t.classList.remove('active'));
+  document.getElementById('tkt-' + i).classList.add('active');
+  const t = tickets[i];
+  const pb = playbooks[t.tag];
+  const prioColor = { high: '#fef2f2', med: '#fef9c3', low: '#dcfce7' };
+  const prioTextColor = { high: '#dc2626', med: '#854d0e', low: '#166534' };
+  document.getElementById('detail-title').textContent = t.id + ' — ' + t.title;
+  document.getElementById('detail-meta').innerHTML =
+    `<span class="pill" style="background:${prioColor[t.prio]};color:${prioTextColor[t.prio]}">${t.prio} priority</span>
+     <span>${t.dept} · ${t.user}</span>
+     <span style="margin-left:auto;font-size:11px;color:#bbb">${t.time}</span>`;
+  const area = document.getElementById('agent-area');
+  area.innerHTML = '';
+  addAgentMsg('ai', 'AI Agent', `Ticket received: <b>${t.title}</b><br>Analyzing...`, 'c-ai');
+  setTimeout(() => {
+    addAgentMsg('ai', 'AI Agent', pb.analyze, 'c-ai');
+    const btnRow = document.createElement('div');
+    btnRow.className = 'btn-row';
+    btnRow.id = 'btn-row-' + i;
+    btnRow.innerHTML = `
+      <button class="abtn abtn-green" onclick="runPlaybook(${i})">▶ Run automated playbook</button>
+      <button class="abtn abtn-blue" onclick="addAgentMsg('ai','AI Agent','Manual review mode. I will suggest each step and wait for your approval before executing.','c-ai')">Manual review</button>
+      <button class="abtn abtn-gray" onclick="addAgentMsg('sys','System','Ticket escalated to L2 support. Assigned to: David Park (Senior IT).','c-sys')">Escalate to L2</button>`;
+    area.appendChild(btnRow);
+    document.getElementById('input-bar').style.display = 'flex';
+  }, 600);
+}
+
+function addAgentMsg(av, name, text, cls) {
+  const area = document.getElementById('agent-area');
+  const avClass = av === 'ai' ? 'av-ai' : av === 'sys' ? 'av-sys' : 'av-user';
+  const initials = av === 'ai' ? 'AI' : av === 'sys' ? 'SYS' : 'You';
+  const d = document.createElement('div');
+  d.className = 'agent-msg';
+  d.innerHTML = `
+    <div class="ag-av ${avClass}">${initials}</div>
+    <div class="msg-wrap">
+      <div class="msg-role">${name}</div>
+      <div class="msg-content ${cls}">${text.replace(/\n/g, '<br>')}</div>
+    </div>`;
+  area.appendChild(d);
+  area.scrollTop = area.scrollHeight;
+}
+
+function runPlaybook(i) {
+  running = true;
+  const t = tickets[i];
+  const pb = playbooks[t.tag];
+  const area = document.getElementById('agent-area');
+  const btnRow = document.getElementById('btn-row-' + i);
+  if (btnRow) btnRow.remove();
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'agent-msg';
+  wrapper.innerHTML = `
+    <div class="ag-av av-sys">SYS</div>
+    <div class="msg-wrap">
+      <div class="msg-role">Automation Engine</div>
+      <div class="msg-content c-sys">
+        <b>Executing playbook — ${pb.steps.length} steps</b>
+        <div class="step-list" id="step-list-${i}"></div>
+      </div>
+    </div>`;
+  area.appendChild(wrapper);
+
+  const sl = document.getElementById('step-list-' + i);
+  pb.steps.forEach((s, j) => {
+    const sd = document.createElement('div');
+    sd.className = 'step';
+    sd.id = `step-${i}-${j}`;
+    sd.innerHTML = `<div class="step-icon si-pending" id="si-${i}-${j}">○</div><span id="st-${i}-${j}" style="color:#999">${s.label}</span>`;
+    sl.appendChild(sd);
+  });
+
+  let delay = 200;
+  pb.steps.forEach((s, j) => {
+    const startDelay = delay;
+    setTimeout(() => {
+      const icon = document.getElementById('si-' + i + '-' + j);
+      const text = document.getElementById('st-' + i + '-' + j);
+      if (icon) { icon.className = 'step-icon si-running'; icon.innerHTML = '<span class="spinner"></span>'; }
+      if (text) text.style.color = '#92400e';
+      area.scrollTop = area.scrollHeight;
+    }, startDelay);
+    delay += s.ms;
+    setTimeout(() => {
+      const icon = document.getElementById('si-' + i + '-' + j);
+      const text = document.getElementById('st-' + i + '-' + j);
+      if (icon) { icon.className = 'step-icon si-done'; icon.innerHTML = '✓'; }
+      if (text) text.style.color = '#1a1a1a';
+      area.scrollTop = area.scrollHeight;
+      if (j === pb.steps.length - 1) {
+        setTimeout(() => {
+          addAgentMsg('ai', 'AI Agent', pb.resolved, 'c-success');
+          const tktEl = document.getElementById('tkt-' + i);
+          if (tktEl) { tktEl.style.opacity = '0.4'; tktEl.querySelector('.ticket-title').style.textDecoration = 'line-through'; }
+          running = false;
+          area.scrollTop = area.scrollHeight;
+        }, 600);
+      }
+    }, delay);
+    delay += 0;
+  });
+}
+
+function sendCmd() {
+  const inp = document.getElementById('cmd-input');
+  const val = inp.value.trim();
+  if (!val) return;
+  inp.value = '';
+  addAgentMsg('user', 'You', val, 'c-user');
+  setTimeout(() => addAgentMsg('ai', 'AI Agent', 'Understood. Checking diagnostics and reporting back momentarily...', 'c-ai'), 400);
+}
+
+renderTickets();
+</script>
+</body>
+</html>

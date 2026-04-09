@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Platform Strategy | PM Portfolio</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;gap:12px;padding:0 20px;height:52px}
+.tb-title{font-size:15px;font-weight:600}
+.pill{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;background:#f3f4f6;color:#555;border:1px solid #e5e5e5}
+.tab-bar{background:#fff;border-bottom:1px solid #e5e5e5;display:flex;padding:0 20px;overflow-x:auto}
+.tab{padding:12px 18px;font-size:13px;cursor:pointer;color:#666;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab:hover{color:#1a1a1a}
+.tab.active{color:#2563eb;font-weight:600;border-bottom-color:#2563eb}
+.panel{display:none;padding:24px;max-width:900px}
+.panel.active{display:block}
+.hero-title{font-size:26px;font-weight:700;margin-bottom:6px;letter-spacing:-.5px}
+.hero-sub{font-size:15px;color:#555;margin-bottom:20px;line-height:1.6}
+.highlight{background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:16px;margin-bottom:20px}
+.highlight-title{font-size:13px;font-weight:700;color:#1d4ed8;margin-bottom:5px}
+.highlight-body{font-size:13px;color:#374151;line-height:1.6}
+.card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:16px}
+.card-icon{font-size:20px;margin-bottom:8px}
+.card-title{font-size:13px;font-weight:700;margin-bottom:6px}
+.card-body{font-size:12px;color:#555;line-height:1.5}
+.st{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.prose{font-size:13px;color:#555;line-height:1.7;margin-bottom:16px}
+.roadmap{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.phase{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:16px}
+.phase-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.phase-title{font-size:14px;font-weight:700;margin-bottom:3px}
+.phase-period{font-size:11px;color:#888;margin-bottom:12px}
+.phase-item{display:flex;align-items:flex-start;gap:7px;font-size:12px;margin-bottom:6px;color:#555}
+.pdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.ctable{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e5e5}
+.ctable th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;color:#888;background:#fafafa;border-bottom:1px solid #e5e5e5;text-transform:uppercase;letter-spacing:.04em}
+.ctable td{padding:10px 14px;border-bottom:1px solid #f0f0f0;vertical-align:top}
+.ctable tr:last-child td{border-bottom:none}
+.win{color:#16a34a;font-weight:600}
+.lose{color:#dc2626}
+.moat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.moat-card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:16px}
+.moat-title{font-size:13px;font-weight:700;margin-bottom:6px}
+.moat-body{font-size:12px;color:#555;line-height:1.5}
+.okr-card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:16px;margin-bottom:12px}
+.okr-title{font-size:13px;font-weight:700;margin-bottom:10px}
+.kr{font-size:12px;color:#555;padding:7px 0;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+.kr:last-child{border-bottom:none}
+.kr-target{font-weight:700;color:#1a1a1a;background:#f9fafb;padding:2px 8px;border-radius:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="width:28px;height:28px;background:#f3f4f6;border:1px solid #e5e5e5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px">&#128203;</div>
+  <div class="tb-title">Platform Strategy: AI in Cloud IT Management</div>
+  <div class="pill">Case study &middot; 2025&ndash;2028</div>
+</div>
+<div class="tab-bar">
+  <div class="tab active" onclick="sw('vision',this)">Vision</div>
+  <div class="tab" onclick="sw('market',this)">Market</div>
+  <div class="tab" onclick="sw('roadmap',this)">3-Year Roadmap</div>
+  <div class="tab" onclick="sw('competitive',this)">Competitive</div>
+  <div class="tab" onclick="sw('moat',this)">Strategic Moat</div>
+  <div class="tab" onclick="sw('okrs',this)">OKRs</div>
+</div>
+
+<div class="panel active" id="tab-vision">
+  <div class="hero-title">The future of AI in cloud IT management</div>
+  <div class="hero-sub">From reactive dashboards to autonomous IT operations &mdash; a 3-year platform bet</div>
+  <div class="highlight">
+    <div class="highlight-title">Core strategic thesis</div>
+    <div class="highlight-body">Cloud IT management is transitioning from <b>tool-assisted humans</b> to <b>AI-first operations</b>. The winners will not be the best dashboard companies &mdash; they will be the companies that build the deepest operational knowledge graph about each customer's cloud environment, making their AI recommendations impossible to replicate without years of customer data. <b>The moat is not the model. The moat is the data flywheel.</b></div>
+  </div>
+  <div class="card-grid">
+    <div class="card"><div class="card-icon">&#128065;&#65039;</div><div class="card-title">Year 1 &mdash; See everything</div><div class="card-body">Unified observability across Azure subscriptions, AVD, licenses, and spend. Real-time anomaly detection. Every resource explained in plain English.</div></div>
+    <div class="card"><div class="card-icon">&#9889;</div><div class="card-title">Year 2 &mdash; Act intelligently</div><div class="card-body">One-click execution of AI recommendations. Workflow automation engine for IT operations. AI agents handle Tier-1 support autonomously. Humans approve; AI executes.</div></div>
+    <div class="card"><div class="card-icon">&#129302;</div><div class="card-title">Year 3 &mdash; Operate autonomously</div><div class="card-body">Self-healing infrastructure that acts without prompts. Predictive scaling, proactive cost controls, autonomous compliance. IT teams shift from operations to strategy.</div></div>
+  </div>
+  <div class="prose">The enterprise cloud IT management market is undergoing a structural shift. IT teams are shrinking while cloud complexity grows. The ratio of cloud resources to IT headcount has increased 5x in 5 years. AI is not optional &mdash; it is the only way to maintain operational excellence at scale. The question is not whether AI will run cloud operations, but who will own the AI layer when it does.</div>
+</div>
+
+<div class="panel" id="tab-market">
+  <div class="st">Market sizing</div>
+  <div class="card-grid">
+    <div class="card"><div class="card-title">Total addressable market</div><div style="font-size:24px;font-weight:700;margin:8px 0;color:#2563eb">$28B</div><div class="card-body">Global cloud management platform market by 2027 (IDC). Growing 19% CAGR driven by cloud complexity and IT labor shortages.</div></div>
+    <div class="card"><div class="card-title">Serviceable market (Azure)</div><div style="font-size:24px;font-weight:700;margin:8px 0;color:#16a34a">$4.2B</div><div class="card-body">Azure-focused IT management + AVD optimization segment. Microsoft's cloud dominance in enterprise makes this a high-growth niche.</div></div>
+    <div class="card"><div class="card-title">Beachhead opportunity</div><div style="font-size:24px;font-weight:700;margin:8px 0;color:#d97706">$680M</div><div class="card-body">Mid-market enterprises (200-5,000 employees) deploying AVD with no AI tooling. Highest willingness to pay, lowest competitive density.</div></div>
+  </div>
+  <div class="st">Key market forces</div>
+  <div class="card-grid">
+    <div class="card"><div class="card-title">IT headcount pressure</div><div class="card-body">Average IT team manages 3.4x more cloud resources than 3 years ago with the same headcount. AI tooling is a survival necessity, not a nice-to-have.</div></div>
+    <div class="card"><div class="card-title">Azure AVD hypergrowth</div><div class="card-body">Azure Virtual Desktop deployments grew 240% post-COVID. Enterprises are locked in. The optimization layer on top is wide open &mdash; Nerdio owns this space.</div></div>
+    <div class="card"><div class="card-title">AI expectations reset</div><div class="card-body">IT buyers now expect every tool to have an AI. The bar has shifted from "does it have AI?" to "does the AI actually do something useful?"</div></div>
+  </div>
+</div>
+
+<div class="panel" id="tab-roadmap">
+  <div class="st">3-year platform roadmap</div>
+  <div class="roadmap">
+    <div class="phase">
+      <div class="phase-label" style="color:#2563eb">Phase 1</div>
+      <div class="phase-title">Intelligence layer</div>
+      <div class="phase-period">2025 &middot; Months 1&ndash;12</div>
+      <div class="phase-item"><div class="pdot" style="background:#2563eb"></div>Real-time cost anomaly detection + NL explanation</div>
+      <div class="phase-item"><div class="pdot" style="background:#2563eb"></div>Context-aware recommendation engine v2</div>
+      <div class="phase-item"><div class="pdot" style="background:#2563eb"></div>Copilot chat interface (Azure cost + AVD)</div>
+      <div class="phase-item"><div class="pdot" style="background:#2563eb"></div>Executive savings dashboard (ROI visibility)</div>
+      <div class="phase-item"><div class="pdot" style="background:#2563eb"></div>Multi-subscription unified view</div>
+    </div>
+    <div class="phase">
+      <div class="phase-label" style="color:#16a34a">Phase 2</div>
+      <div class="phase-title">Automation layer</div>
+      <div class="phase-period">2026 &middot; Months 13&ndash;24</div>
+      <div class="phase-item"><div class="pdot" style="background:#16a34a"></div>One-click execution engine (approve &rarr; deploy)</div>
+      <div class="phase-item"><div class="pdot" style="background:#16a34a"></div>IT workflow automation agent (Tier-1 tickets)</div>
+      <div class="phase-item"><div class="pdot" style="background:#16a34a"></div>Policy enforcement + governance automation</div>
+      <div class="phase-item"><div class="pdot" style="background:#16a34a"></div>Cross-tool integrations (ServiceNow, Jira, Slack)</div>
+      <div class="phase-item"><div class="pdot" style="background:#16a34a"></div>Partner/MSP white-label platform</div>
+    </div>
+    <div class="phase">
+      <div class="phase-label" style="color:#d97706">Phase 3</div>
+      <div class="phase-title">Autonomous layer</div>
+      <div class="phase-period">2027&ndash;2028 &middot; Months 25&ndash;36</div>
+      <div class="phase-item"><div class="pdot" style="background:#d97706"></div>Autonomous cost optimization (no approval needed)</div>
+      <div class="phase-item"><div class="pdot" style="background:#d97706"></div>Predictive scaling from external signals (calendar, CRM)</div>
+      <div class="phase-item"><div class="pdot" style="background:#d97706"></div>Self-healing infrastructure (detect + resolve)</div>
+      <div class="phase-item"><div class="pdot" style="background:#d97706"></div>AI-native IT operations OS for enterprise</div>
+      <div class="phase-item"><div class="pdot" style="background:#d97706"></div>Industry compliance AI (HIPAA, SOC2, GDPR)</div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="tab-competitive">
+  <div class="st">Competitive landscape</div>
+  <table class="ctable">
+    <thead><tr><th>Competitor</th><th>Strength</th><th>Weakness</th><th>Our advantage</th><th>Threat</th></tr></thead>
+    <tbody>
+      <tr><td><b>Apptio Cloudability</b></td><td>Deep FinOps reporting</td><td>No automation; dashboard-only; expensive</td><td class="win">AI execution layer + AVD specialization</td><td style="color:#666">Medium</td></tr>
+      <tr><td><b>CloudHealth (VMware)</b></td><td>Multi-cloud breadth</td><td>Azure depth lacking; no workflow automation</td><td class="win">Azure/AVD native; richer automation</td><td style="color:#666">Medium</td></tr>
+      <tr><td><b>Azure Cost Management</b></td><td>Native, free, integrated</td><td>No AI; no recommendations; no automation</td><td class="win">Everything Azure Cost Mgmt lacks</td><td class="lose">High (free)</td></tr>
+      <tr><td><b>Turbonomic (IBM)</b></td><td>Autonomous resourcing</td><td>Complex; expensive; poor UX; no AVD</td><td class="win">AVD-native; better UX; SMB-friendly</td><td style="color:#666">Medium</td></tr>
+      <tr><td><b>Spot.io (NetApp)</b></td><td>Spot instance optimization</td><td>Narrow scope; not IT operations</td><td class="win">Full-stack IT ops vs single feature</td><td style="color:#666">Low</td></tr>
+    </tbody>
+  </table>
+  <div class="highlight">
+    <div class="highlight-title">Key strategic insight</div>
+    <div class="highlight-body">No competitor combines deep AVD expertise + AI-native recommendations + IT workflow automation in a single platform. Azure Cost Management is the largest threat (free, native) but creates demand for a smarter layer on top. Best positioning: <b>"The AI layer that makes Azure Cost Management actually useful."</b></div>
+  </div>
+</div>
+
+<div class="panel" id="tab-moat">
+  <div class="st">Strategic moat &mdash; what makes this defensible</div>
+  <div class="moat-grid">
+    <div class="moat-card"><div class="moat-title">Data flywheel</div><div class="moat-body">Every customer environment trains the model. After 12 months, recommendations for a new customer are informed by 500+ similar environments. A new entrant starting today would need 3+ years of operational data to match recommendation quality. This is the primary moat.</div></div>
+    <div class="moat-card"><div class="moat-title">AVD ecosystem lock-in</div><div class="moat-body">Existing AVD management position means customers already trust us with session host control. Extending AI into cost optimization and IT operations is a natural upsell. Switching costs are high once automation is integrated into daily IT ops.</div></div>
+    <div class="moat-card"><div class="moat-title">Approval history as training data</div><div class="moat-body">Every recommendation accepted or rejected teaches the model what this specific customer values. After 6 months, the recommendation engine is personalized &mdash; it knows production vs dev, acceptable risk, and approval chains. Generic competitors cannot replicate this per-customer tuning.</div></div>
+    <div class="moat-card"><div class="moat-title">MSP distribution network</div><div class="moat-body">Nerdio's existing MSP partner channel means AI features deploy across hundreds of managed customer environments simultaneously. Each MSP is an enterprise sales motion we do not need to run individually. White-labeling creates partner stickiness on top of customer stickiness.</div></div>
+  </div>
+  <div class="st">What didn't work &mdash; validated learning</div>
+  <div class="prose"><b>Full automation without approval:</b> Early prototypes that executed without human approval had 3x higher rejection rates in retrospective review. The approval layer is not friction &mdash; it is trust-building.<br><br><b>Multi-cloud first:</b> Initial strategy targeted AWS + Azure simultaneously. Customer research revealed IT teams are deeply Azure-specific &mdash; multi-cloud abstraction reduced recommendation quality 40%. Pivoted to Azure-native depth first.<br><br><b>Generic LLM for recommendations:</b> Using off-the-shelf GPT without fine-tuning produced a 28% acceptance rate. Domain-specific training and context injection raised this to 58%. The insight: cloud infrastructure requires operational context that generic models do not have.</div>
+</div>
+
+<div class="panel" id="tab-okrs">
+  <div class="st">Year 1 OKRs &mdash; Platform Intelligence Layer</div>
+  <div class="okr-card">
+    <div class="okr-title">Objective 1: Become the AI copilot IT teams rely on daily</div>
+    <div class="kr"><span>Recommendation acceptance rate</span><span class="kr-target">28% &rarr; 55%</span></div>
+    <div class="kr"><span>Daily active users (of AI features)</span><span class="kr-target">15% &rarr; 60% of seats</span></div>
+    <div class="kr"><span>Copilot chat queries per user per week</span><span class="kr-target">&gt;5 queries/week</span></div>
+  </div>
+  <div class="okr-card">
+    <div class="okr-title">Objective 2: Demonstrate clear, measurable ROI for customers</div>
+    <div class="kr"><span>Avg cost savings per customer per month</span><span class="kr-target">&gt;$4,000/mo</span></div>
+    <div class="kr"><span>Customers with savings dashboard enabled</span><span class="kr-target">&gt;70%</span></div>
+    <div class="kr"><span>NPS from IT admin segment</span><span class="kr-target">42 &rarr; 60</span></div>
+  </div>
+  <div class="okr-card">
+    <div class="okr-title">Objective 3: Establish AVD AI platform leadership</div>
+    <div class="kr"><span>AI-attributable new ACV</span><span class="kr-target">$2.4M</span></div>
+    <div class="kr"><span>Expansion revenue from AI upsell</span><span class="kr-target">$800K</span></div>
+    <div class="kr"><span>Logo churn reduction (IT director segment)</span><span class="kr-target">-15%</span></div>
+  </div>
+  <div class="okr-card">
+    <div class="okr-title">Objective 4: Build the data foundation for Phase 2 automation</div>
+    <div class="kr"><span>Customer environments with full telemetry</span><span class="kr-target">&gt;85%</span></div>
+    <div class="kr"><span>Recommendation training data points</span><span class="kr-target">&gt;50,000</span></div>
+    <div class="kr"><span>Anomaly detection false positive rate</span><span class="kr-target">&lt;5%</span></div>
+  </div>
+</div>
+
+<script>
+function sw(n,el){
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active")});
+  if(el)el.classList.add("active");
+  document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("active")});
+  document.getElementById("tab-"+n).classList.add("active");
+}
+</script>
+</body>
+</html>

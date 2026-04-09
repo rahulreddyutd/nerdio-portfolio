@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Product Discovery Engine | PM Portfolio</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;gap:12px;padding:0 20px;height:52px}
+.tb-title{font-size:15px;font-weight:600}
+.pill{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;background:#dbeafe;color:#1e40af}
+.tab-bar{background:#fff;border-bottom:1px solid #e5e5e5;display:flex;padding:0 20px}
+.tab{padding:12px 18px;font-size:13px;cursor:pointer;color:#666;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab:hover{color:#1a1a1a}
+.tab.active{color:#2563eb;font-weight:600;border-bottom-color:#2563eb}
+.panel{display:none;padding:20px}
+.panel.active{display:block}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.st{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+textarea{border:1px solid #d1d5db;border-radius:8px;padding:12px;font-size:13px;background:#fff;color:#1a1a1a;width:100%;min-height:90px;font-family:inherit;resize:vertical;outline:none}
+textarea:focus{border-color:#2563eb}
+.analyze-btn{margin-top:8px;padding:9px 20px;border-radius:20px;border:none;background:#2563eb;color:#fff;font-size:13px;cursor:pointer;font-weight:600}
+.analyze-btn:hover{background:#1d4ed8}
+.fb-item{padding:10px 12px;border:1px solid #e5e5e5;border-radius:8px;margin-bottom:6px;font-size:13px;background:#fff}
+.fb-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;margin-left:8px}
+.cluster-card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:16px;margin-bottom:12px}
+.cluster-hdr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cluster-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cluster-title{font-size:14px;font-weight:700;flex:1}
+.cluster-count{font-size:12px;color:#888}
+.cluster-score{font-size:14px;font-weight:700;color:#16a34a}
+.cluster-body{font-size:12px;color:#555;line-height:1.5;margin-bottom:8px}
+.quote{font-size:12px;color:#666;padding:6px 10px;border-left:3px solid #bfdbfe;margin-bottom:4px;font-style:italic;background:#f9fafb}
+.bar-row{display:flex;align-items:center;gap:8px;font-size:11px;color:#888;margin-bottom:5px}
+.bar-bg{flex:1;height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.opp-card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:16px;margin-bottom:12px}
+.opp-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.opp-title{font-size:14px;font-weight:700}
+.opp-score{font-size:18px;font-weight:700;color:#16a34a}
+.opp-score-lbl{font-size:10px;color:#888;text-align:right}
+.opp-body{font-size:12px;color:#555;line-height:1.5;margin-bottom:10px}
+.opp-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.opp-metric{background:#f9fafb;border-radius:8px;padding:8px;text-align:center;font-size:12px;font-weight:700;color:#16a34a}
+.prd-btn{font-size:12px;padding:6px 16px;border-radius:20px;border:1px solid #93c5fd;background:#fff;color:#1d4ed8;cursor:pointer;font-weight:600}
+.prd-btn:hover{background:#dbeafe}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;padding:26px;max-width:560px;width:90%;max-height:82vh;overflow-y:auto;border:1px solid #e5e5e5}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px;color:#1a1a1a}
+.ms{margin-bottom:14px}
+.ms-title{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.ms-body{font-size:13px;color:#555;line-height:1.6}
+.close-btn{margin-top:16px;padding:8px 20px;border-radius:20px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-size:13px}
+.close-btn:hover{background:#f3f4f6}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.analyzing{animation:pulse 1s ease-in-out infinite;color:#2563eb;font-size:12px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="width:28px;height:28px;background:#dcfce7;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px">&#128269;</div>
+  <div class="tb-title">Product Discovery Engine</div>
+  <div class="pill">247 feedback items analyzed</div>
+  <div style="margin-left:auto;font-size:12px;color:#666">Sources: Intercom, G2, Slack, Support tickets</div>
+</div>
+<div class="tab-bar">
+  <div class="tab active" onclick="sw('feedback',this)">Feedback Input</div>
+  <div class="tab" onclick="sw('clusters',this)">Problem Clusters (6)</div>
+  <div class="tab" onclick="sw('opportunities',this)">Opportunities (4)</div>
+</div>
+
+<div class="panel active" id="tab-feedback">
+  <div class="two-col">
+    <div>
+      <div class="st">Add new feedback</div>
+      <textarea id="fb-input" placeholder="Paste customer feedback, support ticket, or interview note here...&#10;&#10;Example: 'It takes way too long to find out why my Azure costs went up. I have to dig through 5 different dashboards just to understand one spike...'"></textarea>
+      <button class="analyze-btn" onclick="analyzeFeedback()">Analyze + Cluster &#8594;</button>
+      <div id="analyze-status" style="margin-top:8px"></div>
+    </div>
+    <div>
+      <div class="st">Recent feedback items</div>
+      <div id="fb-list"></div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="tab-clusters"><div id="cluster-list"></div></div>
+<div class="panel" id="tab-opportunities"><div id="opp-list"></div></div>
+
+<div class="overlay" id="prd-overlay">
+  <div class="modal">
+    <div class="modal-title" id="prd-title"></div>
+    <div id="prd-content"></div>
+    <button class="close-btn" onclick="document.getElementById('prd-overlay').classList.remove('open')">Close</button>
+  </div>
+</div>
+
+<script>
+var feedbackItems=[
+  {text:"It takes way too long to find out why my Azure costs went up. I dig through 5 dashboards just to understand one spike.",tag:"Cost visibility",tc:"#dc2626",tbg:"#fef2f2"},
+  {text:"Our team cannot tell which VMs are wasting money until the bill arrives. We need real-time alerts.",tag:"Cost visibility",tc:"#dc2626",tbg:"#fef2f2"},
+  {text:"I wish the tool would just tell me what to do instead of showing me charts.",tag:"AI recommendations",tc:"#1e40af",tbg:"#dbeafe"},
+  {text:"The recommendations are generic. They do not understand our production vs dev environments.",tag:"AI recommendations",tc:"#1e40af",tbg:"#dbeafe"},
+  {text:"Onboarding a new VM takes 45 minutes of manual steps. There has to be a better way.",tag:"Automation",tc:"#854d0e",tbg:"#fef9c3"},
+  {text:"I have to run the same shutdown scripts every Friday. Why cannot this be automated?",tag:"Automation",tc:"#854d0e",tbg:"#fef9c3"},
+  {text:"My CFO asks me for cloud cost reports every week and I have to build them from scratch.",tag:"Reporting",tc:"#166534",tbg:"#dcfce7"},
+  {text:"There is no way to show leadership how much we have saved. Hard to justify the tooling cost.",tag:"Reporting",tc:"#166534",tbg:"#dcfce7"}
+];
+
+var clusters=[
+  {col:"#dc2626",title:"Cost visibility & anomaly detection",count:68,score:9.2,body:"Users cannot identify cost spikes until billing cycle ends. They want real-time alerts and a single source of truth for why costs increased.",quotes:['"I dig through 5 dashboards to understand one spike."','"By the time I see the bill, it is too late to fix anything."'],impact:85,effort:35,freq:72},
+  {col:"#2563eb",title:"Contextual AI recommendations",count:54,score:8.7,body:"Existing recommendations feel generic and lack environment context. Users want the tool to understand prod vs dev and recommend with confidence scores.",quotes:['"The suggestions do not know the difference between prod and dev."','"I want it to tell me what to do, not just show me charts."'],impact:78,effort:55,freq:68},
+  {col:"#d97706",title:"Workflow automation gaps",count:47,score:8.1,body:"Repetitive tasks (VM lifecycle, license assignment, shutdown scheduling) are still manual. Users want one-click execution with approvals.",quotes:['"I run the same shutdown script every Friday."','"45 minutes of manual steps to onboard a new VM."'],impact:72,effort:45,freq:61},
+  {col:"#16a34a",title:"Executive reporting & ROI visibility",count:38,score:7.4,body:"IT leads struggle to justify tooling investment to finance. No built-in reporting that ties actions taken to dollars saved.",quotes:['"Hard to justify the tool cost with no savings dashboard."','"My CFO asks for reports I have to build from scratch."'],impact:68,effort:30,freq:55},
+  {col:"#7c3aed",title:"Multi-subscription management",count:29,score:6.8,body:"Enterprises with 3+ Azure subscriptions have no unified view. Cost and resource data is siloed per subscription.",quotes:['"We have 4 subscriptions and I have to log into each one."'],impact:58,effort:60,freq:42},
+  {col:"#0f766e",title:"Policy enforcement & governance",count:21,score:6.1,body:"No way to enforce tagging requirements or cost guardrails across teams. Governance is reactive, not proactive.",quotes:['"I find out teams are over-spending in the retro."'],impact:50,effort:50,freq:35}
+];
+
+var opportunities=[
+  {title:"Real-time cost anomaly copilot",score:9.2,hypothesis:"If we add real-time anomaly detection with natural language explanations, users will reduce time-to-insight from 2 days to under 5 minutes.",why:"Highest frequency + highest willingness to pay. 68 feedback items, 3 enterprise customers mentioned in NPS comments.",metrics:["TTFR < 5min","NPS +18","+$12k ACV"],difficulty:"Medium",timeline:"6 weeks",prd:"anomaly"},
+  {title:"One-click automation workflow builder",score:8.7,hypothesis:"If users can approve and execute recommendations in one click, weekly active usage will increase 3x and churn among power users will drop.",why:"Users are asking for execution, not just insight. Current suggest-only model creates friction.",metrics:["3x WAU","-15% churn","NPS +12"],difficulty:"High",timeline:"10 weeks",prd:"automation"},
+  {title:"AI recommendation engine v2 (context-aware)",score:8.1,hypothesis:"Adding org-context signals to recommendations will increase acceptance rate from 28% to 55%+.",why:"Current recommendations are rejected 72% of the time. Root cause: they do not know production context.",metrics:["55%+ accept rate","+22% cost saved","FP -60%"],difficulty:"High",timeline:"12 weeks",prd:null},
+  {title:"Savings dashboard for finance/leadership",score:7.4,hypothesis:"A pre-built CFO/leadership report will reduce time-to-report from 4 hours to 0 and increase retention among IT directors.",why:"IT buyers need to justify spend to finance. Low engineering effort, high retention impact.",metrics:["0hr report time","-10% logo churn","NPS +8"],difficulty:"Low",timeline:"4 weeks",prd:"reporting"}
+];
+
+var prds={
+  anomaly:{title:"PRD: Real-time cost anomaly copilot",sections:[
+    {t:"Problem statement",b:"Users discover cost spikes 24-48 hours after they occur. There is no proactive alerting with root-cause explanation in plain English."},
+    {t:"Hypothesis",b:"If we surface anomalies in real-time with a natural language explanation and one-click investigation path, time-to-resolution will drop from 2 days to under 5 minutes for 80% of anomalies."},
+    {t:"Success metrics (OKRs)",b:"TTFR < 5 min for 80% of anomalies\nNPS +18 points from IT admin segment\nAnomaly-related support tickets -60%\nFeature adoption: 70% of active users within 30 days"},
+    {t:"Out of scope",b:"Automated resolution without approval. Cross-cloud anomaly detection (Azure only in v1). Predictions beyond 7-day window."},
+    {t:"Risks & tradeoffs",b:"False positive rate must stay below 5% or users will ignore alerts. Alert fatigue is the main failure mode."}
+  ]},
+  automation:{title:"PRD: One-click workflow builder",sections:[
+    {t:"Problem statement",b:"Users receive recommendations but must manually execute them across multiple systems. Average time from recommendation to action: 3.5 hours."},
+    {t:"Hypothesis",b:"If we enable one-click approval and execution of AI recommendations, weekly active usage will 3x and power user churn will drop 15%."},
+    {t:"Success metrics",b:"WAU: 3x increase\nChurn (power user segment): -15%\nRecommendation-to-execution time: 3.5h to under 2 min\nActions executed via platform: 60%+ of approved recommendations"},
+    {t:"Risks & tradeoffs",b:"Execution without full context can cause harm. Mitigation: blast radius scoring, mandatory preview screen, easy rollback for all actions."}
+  ]},
+  reporting:{title:"PRD: Savings dashboard for finance/leadership",sections:[
+    {t:"Problem statement",b:"IT leads spend 4+ hours/week manually compiling cost reports for finance. No built-in view that ties actions taken to dollars saved."},
+    {t:"Hypothesis",b:"A pre-built, auto-generated savings report will eliminate manual reporting time and increase retention among IT director persona by 10%."},
+    {t:"Success metrics",b:"Reporting time: 4 hours to 0 hours\nLogo churn reduction: 10% in IT director segment\nReport shares: 60%+ of IT admins share monthly"},
+    {t:"Experiment plan",b:"A/B test: send auto-report to 50% of IT admins for 8 weeks. Measure: retention rate, support ticket volume, NPS score change vs control group."}
+  ]}
+};
+
+function renderFb(){
+  document.getElementById("fb-list").innerHTML=feedbackItems.map(function(f){
+    return '<div class="fb-item">'+f.text+'<span class="fb-tag" style="background:'+f.tbg+';color:'+f.tc+'">'+f.tag+'</span></div>';
+  }).join("");
+}
+
+function renderClusters(){
+  document.getElementById("cluster-list").innerHTML=clusters.map(function(c){
+    return '<div class="cluster-card">'
+      +'<div class="cluster-hdr"><div class="cluster-dot" style="background:'+c.col+'"></div>'
+      +'<div class="cluster-title">'+c.title+'</div>'
+      +'<div class="cluster-count">'+c.count+' mentions</div>'
+      +'<div class="cluster-score">'+c.score+'</div></div>'
+      +'<div class="cluster-body">'+c.body+'</div>'
+      +c.quotes.map(function(q){return '<div class="quote">'+q+'</div>';}).join("")
+      +'<div class="bar-row" style="margin-top:8px"><span style="min-width:80px">Impact</span><div class="bar-bg"><div class="bar-fill" style="width:'+c.impact+'%;background:'+c.col+'"></div></div><span>'+c.impact+'%</span></div>'
+      +'<div class="bar-row"><span style="min-width:80px">Frequency</span><div class="bar-bg"><div class="bar-fill" style="width:'+c.freq+'%;background:#888"></div></div><span>'+c.freq+'%</span></div>'
+      +'<div class="bar-row"><span style="min-width:80px">Effort</span><div class="bar-bg"><div class="bar-fill" style="width:'+c.effort+'%;background:#d97706"></div></div><span>'+c.effort+'%</span></div>'
+      +'</div>';
+  }).join("");
+}
+
+function renderOpps(){
+  document.getElementById("opp-list").innerHTML=opportunities.map(function(o){
+    var prdBtn=o.prd&&prds[o.prd]?'<button class="prd-btn" onclick="openPRD(\''+o.prd+'\')">View PRD &#8594;</button>':"";
+    return '<div class="opp-card">'
+      +'<div class="opp-hdr"><div><div class="opp-title">'+o.title+'</div><div style="font-size:12px;color:#888;margin-top:3px">'+o.difficulty+' effort &middot; '+o.timeline+'</div></div>'
+      +'<div><div class="opp-score">'+o.score+'</div><div class="opp-score-lbl">opportunity score</div></div></div>'
+      +'<div class="opp-body"><b>Hypothesis:</b> '+o.hypothesis+'<br><br><b>Why now:</b> '+o.why+'</div>'
+      +'<div class="opp-metrics">'+o.metrics.map(function(m){return '<div class="opp-metric">'+m+'</div>';}).join("")+'</div>'
+      +prdBtn+'</div>';
+  }).join("");
+}
+
+function openPRD(key){
+  var p=prds[key];
+  document.getElementById("prd-title").textContent=p.title;
+  document.getElementById("prd-content").innerHTML=p.sections.map(function(s){
+    return '<div class="ms"><div class="ms-title">'+s.t+'</div><div class="ms-body">'+s.b.replace(/\n/g,"<br>")+'</div></div>';
+  }).join("");
+  document.getElementById("prd-overlay").classList.add("open");
+}
+
+function analyzeFeedback(){
+  var val=document.getElementById("fb-input").value.trim();
+  if(!val)return;
+  var st=document.getElementById("analyze-status");
+  st.innerHTML='<div class="analyzing">Analyzing with AI... clustering against 247 existing items...</div>';
+  setTimeout(function(){
+    st.innerHTML='<div style="font-size:12px;color:#16a34a">&#10003; Added to cluster: <b>Cost visibility &amp; anomaly detection</b> (68 &rarr; 69 mentions)</div>';
+    document.getElementById("fb-input").value="";
+    feedbackItems.unshift({text:val.slice(0,100)+(val.length>100?"...":""),tag:"Cost visibility",tc:"#dc2626",tbg:"#fef2f2"});
+    renderFb();
+  },1800);
+}
+
+function sw(n,el){
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active")});
+  if(el)el.classList.add("active");
+  document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("active")});
+  document.getElementById("tab-"+n).classList.add("active");
+}
+
+renderFb();
+renderClusters();
+renderOpps();
+</script>
+</body>
+</html>
